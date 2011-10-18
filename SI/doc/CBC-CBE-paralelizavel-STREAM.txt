@@ -1,0 +1,17 @@
+CBC - Cipher-block chaining
+Quebra todos os padrões devido ao valor aleatório de IV e à dependente do bloco anterior cifrado para a operação de or-exclusivo. Por isso, o c1 vai ser diferente de c2 mesmo que m1 e m3 sejam iguais.
+- A cifra do bloco anterior irá interferir na primitiva do próximo bloco de bits.
+
+IV – nao éconfidencial, deve ser aleatório, evitar repetiçao.
+IV vai a descoberto, porquê? Porque para chegar a mensagem a m1 preciso de saber qual o algoritmo usado para cifrar sendo usado também para decifrar...
+		
+Padroes em claro no ECB ao contrário do CBC, porque CBC usa um valor aleatório para efectuar a operação, bem como nos seguintes blocos o xor e feito com o x-1 cifrado.
+No CBC nao possivel paralelizar a cifra – porque se quizeresmos cifrar a partir de m4 nao o será possível porque precisamos de c3 para a operaçao de xor, mas possivel paralelizar a decifra – porque podemos decifrar a partir de m4 porque já temos m3 calculado!
+CBC pode ser atacado por hackers porque:
+se o atacante propositamente consegue ver os criptogramas e bits qual e o impacto? 
+	c2->m2 : nao e suposto haver alteraçao de bit de c2 para m2, portanto com xor de c1 tera impacto de m2, tds os bits sao alterados, mas em m3 so altera 1 bit porque ao alterar o bit de menor peso de c2 o bit de menor peso de m3 será alterado...
+----------------------------------------------------------------------------------------
+modos de operaçao em stream
+ – o key stream e um gerador de chaves com o tamanho da mensagem, totalmente aleatorio, nestas circunstancias o criptograma seria indecifrável, porque sem conhecer a key a probalidade de key ser 1 ou 0 e m1 se 1 ou 0 é 0%, portanto quem acertar é sortudo :)
+ - mensagem tb por partes, mas com um limite por isso quando a mensagem tem 1Gb nao tera uma key de 1Gb.
+ - O key stream e gerado pelas operaçoes: modo counter (I). o contador passa pela primitiva com uma chave e um dos bits desta é usado para acrescentar ao key stream, este processo é feito até se completar os bits da key (igual a mensagem). Até se pode aproveitar r bits e nao "n" (todos os bits da mensagem) para garantir que este modo continua indecifrável, importante ter esse comportamento na decifra para que seja possivel decifrar a mensagem e obter m1' = m1.
