@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<users>
+	<user name='Nuno Alexandre Cancelo' category='' username='nac' password='' ></user>
+	<user name='Nuno Alexandre Cancelo' category='colaborator' username='colaborator' password='123'></user>
+	<user name='Nuno Alexandre Cancelo' category='coordenator' username='coord' password='123'></user>
+</users>
