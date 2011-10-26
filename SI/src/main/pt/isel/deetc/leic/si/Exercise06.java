@@ -17,13 +17,21 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 
 public final class Exercise06 {
-	private static final String _algoritm="AES";
+	
+	
+	private static final String _ALGORITHM="AES";
+	private static final short _BLOCKSIZE= 1024;
 
 	public static void decypher(String inputFile) throws FileNotFoundException {
 		if (inputFile == null)
 			return;
 	}
 
+	
+	
+	
+	
+	
 	public static void cypher(String inputFile,X509Certificate certificate) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		if (inputFile == null)
 			return;
@@ -32,8 +40,8 @@ public final class Exercise06 {
 		OutputStream metadata = new FileOutputStream(inputFile + ".metadata");
 		OutputStream ciphertext = new FileOutputStream(inputFile + ".ciphertext");
 
-		Cipher cipher = Cipher.getInstance(_algoritm);
-		KeyGenerator kg = KeyGenerator.getInstance(_algoritm);
+		Cipher cipher = Cipher.getInstance(_ALGORITHM);
+		KeyGenerator kg = KeyGenerator.getInstance(_ALGORITHM);
 		PublicKey sk = certificate.getPublicKey();
 		
 		cipher.init(Cipher.ENCRYPT_MODE, sk);
