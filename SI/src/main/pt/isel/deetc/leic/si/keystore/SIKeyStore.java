@@ -1,8 +1,10 @@
 package pt.isel.deetc.leic.si.keystore;
 
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -10,12 +12,16 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertPathBuilder;
 import java.security.cert.CertPathBuilderException;
 import java.security.cert.CertStore;
+import java.security.cert.CertStoreParameters;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.PKIXBuilderParameters;
 import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class SIKeyStore implements IKeyStore {
@@ -29,7 +35,9 @@ public class SIKeyStore implements IKeyStore {
 
 	@Override
 	public boolean isValid(Certificate certificate) {
+		boolean result;
 		X509CertSelector certToValidate= new X509CertSelector();
+		
 		PKIXBuilderParameters builderParams;
 		certToValidate.setCertificate((X509Certificate)certificate);
 		try {
@@ -39,37 +47,44 @@ public class SIKeyStore implements IKeyStore {
 	        CertPathBuilder builder;
 	        builder = CertPathBuilder.getInstance("PKIX");
 	        builder.build(builderParams);
-	        return true;
+	        result= true;
 		} catch (KeyStoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			result= false;
 		} catch (InvalidAlgorithmParameterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			result= false;
 		} catch (CertPathBuilderException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			result= false;
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			result= false;
 		}
-		return false;
+			return result;
+		
 		
 	}
 
 	
-	public static KeyStore getKeyStore(String filePath, String keyStorePassword, String keyStoreType) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException{
+	public static KeyStore getKeyStore(String filePath,String filename, String keyStorePassword, String keyStoreType) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException{
         KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-        FileInputStream keyStoreStream = new FileInputStream(filePath);
+        FileInputStream keyStoreStream = new FileInputStream(filePath+'/'+filename);
         keyStore.load(keyStoreStream,keyStorePassword.toCharArray());
         return keyStore;
     }
-    public static Certificate getPublicCertificate(String filePath, String certifcateType) throws CertificateException, FileNotFoundException{
+	public static CertStore getCertStore(String type, String path, String certificateNameList[]) 
+			throws CertificateException, FileNotFoundException, InvalidAlgorithmParameterException, NoSuchAlgorithmException{
+	    CertificateFactory cf = CertificateFactory.getInstance(type);
+	    List<Certificate> mylist = new ArrayList<Certificate>();
+	    for (int i = 0; i < certificateNameList.length; i++) {
+	      InputStream in = new FileInputStream(path+'/'+certificateNameList[i]);
+	      Certificate c = cf.generateCertificate(in);
+	      mylist.add(c);
+	    }
+	    CertStoreParameters cparam = new CollectionCertStoreParameters(mylist);
+	    return  CertStore.getInstance("Collection", cparam);
+	}
+    public static Certificate getCertificate(String filePath, String certifcateType) throws CertificateException, FileNotFoundException{
         CertificateFactory Certfactory = CertificateFactory.getInstance(certifcateType);
         Certificate generateCertificate = (Certificate)Certfactory.generateCertificate(new FileInputStream(filePath));
         return generateCertificate;
     }	
 	
-
-
 }
