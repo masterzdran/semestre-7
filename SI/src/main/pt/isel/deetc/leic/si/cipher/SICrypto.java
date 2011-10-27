@@ -56,7 +56,7 @@ public class SICrypto implements ICipher {
 	public OutputStream decipher(InputStream input, Certificate certificate,String algorihm) 	
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException
 	{
-		return cipher(input, certificate, algorihm, true);
+		return cipher(input, certificate, algorihm, false);
 	}
 
 
