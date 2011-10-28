@@ -18,60 +18,59 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 public class SICrypto{
 
-	private OutputStream mycipher(InputStream input, String certificateFilename, String metadataFilename, Certificate certificate, String algorithm, boolean doCiphet) 
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException {
-		Cipher cipher = Cipher.getInstance(algorithm);
+	private OutputStream mycipher(InputStream input, String certificateFilename, String metadataFilename, SecretKey key, String transformationAlgorithm, boolean doCiphet) throws Exception {
+		Cipher cipher = Cipher.getInstance(transformationAlgorithm);
 		OutputStream ciphertext = new ByteArrayOutputStream();
-		byte[] _key = new byte[certificate.getPublicKey().l];
-		new Random().nextBytes(_key);
-		SecretKeySpec key = new SecretKeySpec(_key, "AES");
+
 		cipher.init((doCiphet)?Cipher.ENCRYPT_MODE:Cipher.DECRYPT_MODE, key);
-		
-		byte[] b = new byte[1024];
+
+
+
+		byte[] b = new byte[4*1024];
 	    int length;
+	    
 		while((length = input.read(b)) != -1){
-			cipher.update(b, 0, length);
+			ciphertext.write(cipher.update(b, 0, length));
 		}
 		ciphertext.write(cipher.doFinal());
 		
 		
-		input.close();
+		//input.close();
+		ciphertext.flush();
 		ciphertext.close();
 		
-		writeMetadata(_key, certificateFilename, metadataFilename, certificate, algorithm);
+
 		return ciphertext;
 		
 	}
 	
-	public OutputStream cipher(InputStream input,String certificateFilename, String metadataFilename, Certificate certificate, String algorihm) 
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException 
+	public OutputStream cipher(InputStream input,String certificateFilename, String metadataFilename, SecretKey key, String transformationAlgorithm) throws Exception 
 	{
-		return mycipher(input, metadataFilename,certificateFilename,certificate, algorihm, true);
+		return mycipher(input, certificateFilename,metadataFilename,key, transformationAlgorithm, true);
 	}
 
 
-	public OutputStream decipher(InputStream input,String certificateFilename, String metadataFilename, Certificate certificate,String algorihm) 	
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException
+	public OutputStream decipher(InputStream input,String certificateFilename, String metadataFilename,SecretKey key,String transformationAlgorithm)throws Exception
 	{
-		return mycipher(input, certificateFilename,metadataFilename,certificate, algorihm, false);
+		return mycipher(input, certificateFilename,metadataFilename,key, transformationAlgorithm, false);
 	}
 
 
-	private  void writeMetadata(byte[] symmetricKey,String certificateFilename, String metadataFilename, Certificate certificate,String algorithm) 
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException
+	public static  void writeMetadata(byte[] symmetricKey,String certificateFilename, String metadataFilename, String transformationAlgorithm) throws Exception
 	{
-		Cipher cipher = Cipher.getInstance(algorithm);
-		cipher.init(Cipher.ENCRYPT_MODE, certificate);
-		byte[] b = cipher.doFinal(symmetricKey);
+//		Cipher cipher = Cipher.getInstance(algorithm);
+//		cipher.init(Cipher.ENCRYPT_MODE, certificate);
+//		byte[] b = cipher.doFinal(symmetricKey);
 
 		 Properties config = new Properties();
-		 config.put("KEY", b);
+		 config.put("KEY", new String(symmetricKey));
          config.put("CERTIFICADO", certificateFilename);
-         
+         config.put("ALGORITMO", transformationAlgorithm);
          FileOutputStream fileWrite = new FileOutputStream(metadataFilename);
          config.storeToXML(fileWrite,  "Metadata File");
          fileWrite.close();

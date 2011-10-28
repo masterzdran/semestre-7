@@ -18,6 +18,8 @@ import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.crypto.SecretKey;
+
 import pt.isel.deetc.leic.si.cipher.SICrypto;
 import pt.isel.deetc.leic.si.keystore.SIKeyStore;
 
@@ -110,14 +112,10 @@ public final class Exercise06 {
 	
 	
 	
-	public static void cifer(){}
-	public static void decifer(){}
-	
-	
 	public static void write2file(String filename, OutputStream fOut) throws Exception{
     	FileOutputStream f = new FileOutputStream(new File(filename));
     	PrintStream p = new PrintStream(f);
-    	p.print(fOut.toString().getBytes());
+    	p.print(fOut);
     	p.close();
     	f.close();
 	}
@@ -132,7 +130,9 @@ public final class Exercise06 {
 		String certificatePath = basedPath+"/certs.end.entities";
 		String file ="readme.txt";
 		String certType = "X.509";
-		String symKey = "123asd123asd";
+
+		String transformationAlgorithm = "AES/ECB/PKCS5Padding";
+		int keysize = 128;
 
 		Map<String, SIKeyStore> allStores = getTrustedCollection(trustedPath,
 				intermediaPath, certType);
@@ -140,21 +140,28 @@ public final class Exercise06 {
 				certificatePath, certType);
 		
 		SICrypto sc = new SICrypto();
-		
+		SecretKey key;
+
 		try {
 			Certificate certificate = SIKeyStore.getCertificate(certificatePath+"/Alice_1_cipher.cer", certType);
 			FileInputStream readFile = new FileInputStream(basedPath+'/'+file);
-			
+			key = SIKeyStore.getSecretKey("AES", keysize);
 			for (String store : allStores.keySet()) {
-			if (allStores.get(store).isValid(certificate)) {
-				OutputStream o = sc.cipher(readFile, "Alice_1_cipher.cer", "Alice_1_cipher.cer.metadata", certificate, "AES");
-				write2file("readme.txt.cipher", o);
-				//sc.writeMetadata(symKey, "Alice_1_cipher.cer", "Alice_1_cipher.cer.metadata", certificate, "AES");        
-				break;
+				if (allStores.get(store).isValid(certificate)) {
+					OutputStream o = sc.cipher(readFile, "Alice_1_cipher.cer", certificatePath+"/Alice_1_cipher.cer.metadata", key, transformationAlgorithm);
+					write2file(basedPath+'/'+file+".cifred", o);
+					SICrypto.writeMetadata(key.getEncoded(), "Alice_1_cipher.cer", certificatePath+"/Alice_1_cipher.cer.metadata", transformationAlgorithm);
+//					System.out.println(o);
+//					o.flush();
+					
+					break;
+				}
 			}
-			}
-		
-			
+			readFile.close();
+			FileInputStream readFile2 = new FileInputStream(basedPath+'/'+file+".cifred");
+			OutputStream o = sc.decipher(readFile2, "Alice_1_cipher.cer", certificatePath+"/Alice_1_cipher.cer.metadata", key, transformationAlgorithm);
+			System.out.println("--->"+o);
+			write2file(basedPath+'/'+file+".decifred", o);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
