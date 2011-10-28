@@ -23,6 +23,9 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+
 
 public class SIKeyStore implements IKeyStore {
 	private final CertStore _intCer;
@@ -86,5 +89,11 @@ public class SIKeyStore implements IKeyStore {
         Certificate generateCertificate = (Certificate)Certfactory.generateCertificate(new FileInputStream(filePath));
         return generateCertificate;
     }	
+    
+    public static SecretKey getSecretKey(String transformationAlgorithm, int size) throws Exception{
+    	KeyGenerator kg = KeyGenerator.getInstance(transformationAlgorithm);
+    	kg.init(size);
+    	return kg.generateKey();
+    }
 	
 }
