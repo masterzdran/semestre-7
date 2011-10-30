@@ -1,0 +1,41 @@
+sudo losetup -f
+sudo losetup /dev/loop0 /home/elvisp/lsc/disks/lsc-hd63-flat.img
+sudo fdisk -lu /dev/loop0
+
+//change the partition type of the second partition to 0x81
+/*
+f disk -c /dev/loop0
+ Command (m for help): t
+  -> Partition Number (1-4): 2
+  -> Hex Code (type L to code list): 81
+
+
+Partition         Start offset                                  Length
+#1            63*512 =  32256           ((43343-63)+1)*512 = 22159872
+#2            43344*512 = 22192128  ((129023-43344)+1)*512 = 43868160
+*/
+sudo losetup --offset 32256 --sizelimit 22159872 /dev/loop1 /home/elvisp/lsc/disks/lsc-hd63-flat.img
+sudo losetup --offset 221921128 --sizelimit 43868160 /dev/loop2 /home/elvisp/lsc/disks/lsc-hd63-flat.img
+
+sudo fsck.msdos -v /dev/loop1
+sudo mkfs.minix -v /dev/loop2
+sudo fsck.minix -vfs /dev/loop2
+
+sudo losetup -d /dev/loop2
+sudo losetup -d /dev/loop1
+sudo losetup -d /dev/loop0
+
+sudo mkdir /mnt/lsc
+sudo chown isel.isel /mnt/lsc
+mkdir /mnt/lsc/hd0p1
+mkdir /mnt/lsc/hd0p2
+
+sudo mount /home/elvisp/lsc/disks/lsc-hd63-flat.img /mnt/lsc/hd0p1 -o loop,offset=32256,sizelimit=22159872,nodev,noexec,rw,users,uid=1000,gid=1000
+
+sudo mount /home/elvisp/lsc/disks/lsc-hd63-flat.img /mnt/lsc/hd0p2 -o loop,offset=22192128,sizelimit=43868160,nodev,noexec,rw,users
+
+sudo chown isel.isel /mnt/lsc/hd0p2
+
+mkdir /mnt/lsc/hd0p1/extra
+cp extra.zip /mnt/lsc/hd0p1/extra/
+ls -l /mnt/lsc/hd0p1/extra/
