@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.security.InvalidAlgorithmParameterException;
@@ -20,8 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import javax.security.cert.X509Certificate;
 
 import pt.isel.deetc.leic.si.cipher.SICrypto;
 import pt.isel.deetc.leic.si.keystore.SIKeyStore;
@@ -115,10 +112,6 @@ public final class Exercise06 {
 	
 	
 	
-	public static void cifer(){}
-	public static void decifer(){}
-	
-	
 	public static void write2file(String filename, OutputStream fOut) throws Exception{
     	FileOutputStream f = new FileOutputStream(new File(filename));
     	PrintStream p = new PrintStream(f);
@@ -131,14 +124,15 @@ public final class Exercise06 {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		//String basedPath = "C:/WorkingArea/ISEL/semestre-7/SI/doc/SI-Inv1112-Serie1-Enunciado_Anexos/certificates-and-keys/distr";
-		String basedPath = "C:/config/certificates-and-keys/distr";
+		String basedPath = "C:/WorkingArea/ISEL/semestre-7/SI/doc/SI-Inv1112-Serie1-Enunciado_Anexos/certificates-and-keys/distr";
 		String trustedPath = basedPath+"/trustanchors";
 		String intermediaPath = basedPath+"/certs.CA.intermediate";
 		String certificatePath = basedPath+"/certs.end.entities";
 		String file ="readme.txt";
 		String certType = "X.509";
-		String symKey = "123asd123asd";
+
+		String transformationAlgorithm = "AES/ECB/PKCS5Padding";
+		int keysize = 128;
 
 		Map<String, SIKeyStore> allStores = getTrustedCollection(trustedPath,
 				intermediaPath, certType);
@@ -146,30 +140,28 @@ public final class Exercise06 {
 				certificatePath, certType);
 		
 		SICrypto sc = new SICrypto();
-		
+		SecretKey key;
+
 		try {
 			Certificate certificate = SIKeyStore.getCertificate(certificatePath+"/Alice_1_cipher.cer", certType);
 			FileInputStream readFile = new FileInputStream(basedPath+'/'+file);
-			SecretKey sk = SICrypto.getSecretKey("AES", 128);
+			key = SIKeyStore.getSecretKey("AES", keysize);
 			for (String store : allStores.keySet()) {
 				if (allStores.get(store).isValid(certificate)) {
-					OutputStream o = sc.cipher(readFile, "Alice_1_cipher.cer", "Alice_1_cipher.cer.metadata", sk, "AES/CBC/PKCS5Padding");
-					write2file(basedPath+'/'+"readme.txt.cipher", o);
-					System.out.println(o);
-					SICrypto.writeMetadata(sk.getEncoded().toString(), "Alice_1_cipher.cer",certificatePath+'/'+"Alice_1_cipher.cer.metadata", "AES/CBC/PKCS5Padding");        
+					OutputStream o = sc.cipher(readFile, "Alice_1_cipher.cer", certificatePath+"/Alice_1_cipher.cer.metadata", key, transformationAlgorithm);
+					write2file(basedPath+'/'+file+".cifred", o);
+					SICrypto.writeMetadata(key.getEncoded(), "Alice_1_cipher.cer", certificatePath+"/Alice_1_cipher.cer.metadata", transformationAlgorithm);
+//					System.out.println(o);
+//					o.flush();
+					
 					break;
 				}
 			}
-			
-			
-			
-			FileInputStream inputFile = new FileInputStream(basedPath+'/'+"readme.txt.cipher"); 
-			//SecretKey sk = new SecretKeySpec("[B@5f7a8a02".getBytes(), "AES"); // SICrypto.getSecretKey("AES", 128);
-			System.out.println(inputFile.toString());
-			OutputStream o = sc.decipher( inputFile, "Alice_1_cipher.cer", "Alice_1_cipher.cer.metadata", sk, "AES/CBC/PKCS5Padding");
-		
-			System.out.println(o);
-			
+			readFile.close();
+			FileInputStream readFile2 = new FileInputStream(basedPath+'/'+file+".cifred");
+			OutputStream o = sc.decipher(readFile2, "Alice_1_cipher.cer", certificatePath+"/Alice_1_cipher.cer.metadata", key, transformationAlgorithm);
+			System.out.println("--->"+o);
+			write2file(basedPath+'/'+file+".decifred", o);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
