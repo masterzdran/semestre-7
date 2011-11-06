@@ -20,8 +20,13 @@ import java.util.Map;
 
 import javax.crypto.SecretKey;
 
-import cancelo.cipher.SICrypto;
-import cancelo.keystore.SIKeyStore;
+import cancelo.cipher.Metadata;
+import cancelo.cipher.SICipher;
+import cancelo.keystore.ValidateCertificates;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.InputStreamReader;
+import java.security.PrivateKey;
 
 public final class Exercise06 {
 
@@ -33,7 +38,7 @@ public final class Exercise06 {
 
         for (File f : files) {
             try {
-                Certificate certificate = SIKeyStore.getCertificate(
+                Certificate certificate = ValidateCertificates.getCertificate(
                         f.getAbsolutePath(), certType);
                 hm.put(f.getName(), certificate);
             } catch (CertificateException e) {
@@ -59,9 +64,9 @@ public final class Exercise06 {
         return dir.listFiles(myFileFilter);
     }
 
-    private static HashMap<String, SIKeyStore> getTrustedCollection(
+    private static HashMap<String, ValidateCertificates> getTrustedCollection(
             String trustedPath, String intermediaPath, String certType) {
-        HashMap<String, SIKeyStore> hm = new HashMap<String, SIKeyStore>();
+        HashMap<String, ValidateCertificates> hm = new HashMap<String, ValidateCertificates>();
         final String jks = "jks";
         final String intermedia = "intermedia.cer";
 
@@ -80,11 +85,11 @@ public final class Exercise06 {
 
         for (File f : jksfiles) {
             try {
-                KeyStore rootCertificate = SIKeyStore.getKeyStore(trustedPath,
+                KeyStore rootCertificate = ValidateCertificates.getKeyStore(trustedPath,
                         f.getName(), "changeit", jks);
-                CertStore intermediateCertificate = SIKeyStore.getCertStore(
+                CertStore intermediateCertificate = ValidateCertificates.getCertStore(
                         certType, intermediaPath, larr);
-                SIKeyStore siks = new SIKeyStore(intermediateCertificate,
+                ValidateCertificates siks = new ValidateCertificates(intermediateCertificate,
                         rootCertificate);
                 hm.put(f.getName(), siks);
             } catch (CertificateException e) {
@@ -120,68 +125,63 @@ public final class Exercise06 {
 
     public static void main(String[] args) throws Exception {
         // TODO Auto-generated method stub
-
-        String original = "/home/elvisp/Desktop/Exercise06.java";
-        String cipher = "/home/elvisp/Desktop/Exercise06-cipher.java";
-        String decipher = "/home/elvisp/Desktop/Exercise06-result.java";
-        SecretKey key = SIKeyStore.getSecretKey("AES", 128);
-
-        SICrypto si = new SICrypto();
-        FileInputStream fis = new FileInputStream(original);
-
-        OutputStream out = si.cipher(fis, key, "AES/ECB/PKCS5Padding");
-        write2file(cipher, out);
-
-        fis.close();
-
-        fis = new FileInputStream(cipher);
-        out = si.decipher(fis, key, "AES/ECB/PKCS5Padding");
-        write2file(decipher, out);
-
-        fis.close();
-
-        /*String basedPath = "C:/WorkingArea/ISEL/semestre-7/SI/doc/SI-Inv1112-Serie1-Enunciado_Anexos/certificates-and-keys/distr";
+        String basedPath = "D:/ISEL/semestre-7/SI/src";//;"C:/WorkingArea/ISEL/semestre-7/SI/doc/SI-Inv1112-Serie1-Enunciado_Anexos/certificates-and-keys/distr";
         String trustedPath = basedPath+"/trustanchors";
         String intermediaPath = basedPath+"/certs.CA.intermediate";
         String certificatePath = basedPath+"/certs.end.entities";
-        String file ="readme.txt";
+        
+        String originalfile = "C:\\Users\\ElvisP\\Desktop\\Exercise06.java";//"/home/elvisp/Desktop/Exercise06.java";
+        String encryptfile = "C:\\Users\\ElvisP\\Desktop\\Exercise06-cipher.java";//"/home/elvisp/Desktop/Exercise06-cipher.java";
+        String result = "C:\\Users\\ElvisP\\Desktop\\Exercise06-result.java";//"/home/elvisp/Desktop/Exercise06-result.java";
+        
+        String metadata = "C:\\Users\\ElvisP\\Desktop\\metadata.xml";
+        String metadataencrypt = "C:\\Users\\ElvisP\\Desktop\\metadata-cipher.xml";
+        String metadataresult = "C:\\Users\\ElvisP\\Desktop\\metadata-cipher.xml";
+        
         String certType = "X.509";
-
-        String transformationAlgorithm = "AES/ECB/PKCS5Padding";
+        String typeSecretkey = "AES", transformationAlgorithm = "AES/ECB/PKCS5Padding";
         int keysize = 128;
 
-        Map<String, SIKeyStore> allStores = getTrustedCollection(trustedPath,
+        Map<String, ValidateCertificates> allStores = getTrustedCollection(trustedPath,
         intermediaPath, certType);
-        Map<String, Certificate> allCertificate = getCertificateCollection(
-        certificatePath, certType);
-
-        SICrypto sc = new SICrypto();
+        
+        SICipher sicipher = new SICipher();
         SecretKey key;
 
         try {
-        Certificate certificate = SIKeyStore.getCertificate(certificatePath+"/Alice_1_cipher.cer", certType);
-        FileInputStream readFile = new FileInputStream(basedPath+'/'+file);
-        key = SIKeyStore.getSecretKey("AES", keysize);
-        for (String store : allStores.keySet()) {
-        if (allStores.get(store).isValid(certificate)) {
-        OutputStream o = sc.cipher(readFile, "Alice_1_cipher.cer", certificatePath+"/Alice_1_cipher.cer.metadata", key, transformationAlgorithm);
-        write2file(basedPath+'/'+file+".cifred", o);
-        SICrypto.writeMetadata(key.getEncoded(), "Alice_1_cipher.cer", certificatePath+"/Alice_1_cipher.cer.metadata", transformationAlgorithm);
-        //					System.out.println(o);
-        //					o.flush();
+                Certificate certificate = ValidateCertificates.getCertificate(
+                            certificatePath+"/Alice_1_cipher.cer", certType);
+                key = ValidateCertificates.GenerateSecretKey(typeSecretkey, keysize);
+                for (String store : allStores.keySet()) {
+                    if (allStores.get(store).isValid(certificate)) {
+                        sicipher.Cipher(originalfile, encryptfile, key, transformationAlgorithm);
+                        Metadata.writeMetadata(key.getEncoded(), certificate.toString(), metadata, transformationAlgorithm);
+                        sicipher.Cipher(metadata, metadataencrypt, certificate.getPublicKey(), certificate.getPublicKey().getAlgorithm()) ;
+                        break;
+                    }
+                }
+                
+                PrivateKey privkey = ValidateCertificates.GetPrivateKey(certificatePath+"/Alice_1_cipher.cer");
+                
+                //decifrar metadata
+                sicipher.Decipher(metadataencrypt, metadataresult, privkey , certificate.getPublicKey().getAlgorithm()); 
+                //metadataresult
+                
+                //obter algortimo e chave 
+                String alg, symmetrickey;
+                FileInputStream fstream = new FileInputStream(metadataresult);
+                BufferedReader br = new BufferedReader(new InputStreamReader(new DataInputStream(fstream)));
+                symmetrickey = br.readLine();
+                alg = br.readLine();
+                
+                //decifrar ficheiro original              
+                
+                OutputStream o = null;//sicipher.Decipher(encryptfile, result, , alg);
+                System.out.println("--->"+o);
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 
-        break;
         }
-        }
-        readFile.close();
-        FileInputStream readFile2 = new FileInputStream("");
-        OutputStream o = sc.decipher(readFile2, "Alice_1_cipher.cer", certificatePath+"/Alice_1_cipher.cer.metadata", key, transformationAlgorithm);
-        System.out.println("--->"+o);
-        write2file(basedPath+'/'+file+".decifred", o);
-        } catch (Exception e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-        }*/
-
-    }
 }
