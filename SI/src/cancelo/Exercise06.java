@@ -26,7 +26,14 @@ import cancelo.keystore.ValidateCertificates;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.InputStreamReader;
+import java.security.KeyFactory;
 import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.spec.KeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public final class Exercise06 {
 
@@ -136,7 +143,7 @@ public final class Exercise06 {
         
         String metadata = "C:\\Users\\ElvisP\\Desktop\\metadata.xml";
         String metadataencrypt = "C:\\Users\\ElvisP\\Desktop\\metadata-cipher.xml";
-        String metadataresult = "C:\\Users\\ElvisP\\Desktop\\metadata-cipher.xml";
+        String metadataresult = "C:\\Users\\ElvisP\\Desktop\\metadata-result.xml";
         
         String certType = "X.509";
         String typeSecretkey = "AES", transformationAlgorithm = "AES/ECB/PKCS5Padding";
@@ -154,19 +161,31 @@ public final class Exercise06 {
                 key = ValidateCertificates.GenerateSecretKey(typeSecretkey, keysize);
                 for (String store : allStores.keySet()) {
                     if (allStores.get(store).isValid(certificate)) {
+                        System.out.println("Certificate it was validated: " + certificate);
+                            
+                        System.out.println("Encrypt message on file: " + originalfile);
                         sicipher.Cipher(originalfile, encryptfile, key, transformationAlgorithm);
+                        
+                        System.out.println("Creating Metadata on file:" + metadata);
                         Metadata.writeMetadata(key.getEncoded(), certificate.toString(), metadata, transformationAlgorithm);
+                        
+                        System.out.println("Encrypt metadata on file: " + metadataencrypt);
                         sicipher.Cipher(metadata, metadataencrypt, certificate.getPublicKey(), certificate.getPublicKey().getAlgorithm()) ;
                         break;
                     }
                 }
                 
-                PrivateKey privkey = ValidateCertificates.GetPrivateKey(certificatePath+"/Alice_1_cipher.cer");
+                
+                
+                System.out.println("\n\nGet private key of pfx");
+                PrivateKey privkey = ValidateCertificates.GetPrivateKey(basedPath+"/pfx/Alice_1_cipher.pfx");
                 
                 //decifrar metadata
+                System.out.println("Decrypt metadata on file: " + metadataresult);
                 sicipher.Decipher(metadataencrypt, metadataresult, privkey , certificate.getPublicKey().getAlgorithm()); 
                 //metadataresult
                 
+                System.out.println("Getting key and algorithm.");
                 //obter algortimo e chave 
                 String alg, symmetrickey;
                 FileInputStream fstream = new FileInputStream(metadataresult);
@@ -175,9 +194,12 @@ public final class Exercise06 {
                 alg = br.readLine();
                 
                 //decifrar ficheiro original              
-                
-                OutputStream o = null;//sicipher.Decipher(encryptfile, result, , alg);
-                System.out.println("--->"+o);
+                SecretKeySpec sks = new SecretKeySpec(symmetrickey.getBytes(), typeSecretkey);
+                                
+                //da excepcao com sks: java.security.InvalidKeyException: Invalid AES key length: 26 bytes
+                //OutputStream o = sicipher.Decipher(encryptfile, result, sks , alg);
+                OutputStream o = sicipher.Decipher(encryptfile, result, key , alg);
+                System.out.println("Decrypt message on file: " + result);
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
