@@ -28,7 +28,6 @@ public class UnboundedQueue<T> {
 		}
 	}
 	
-	
 	public T take() throws InterruptedException
 	{
 		synchronized (_buffer) {
@@ -38,13 +37,22 @@ public class UnboundedQueue<T> {
 			TakeRequest<T> myRequest = new TakeRequest<T>();
 			_requests.addLast(myRequest);
 			while (true){
-				_buffer.wait();
+				/*_buffer.wait();
+				if (myRequest._element != null)
+					return myRequest._element;*/
+				try{_buffer.wait();}
+				catch (InterruptedException ie) {
+					if (myRequest._element != null)
+					{
+						Thread.currentThread().interrupt();
+						return myRequest._element;
+					}
+					_requests.remove(myRequest);
+					throw ie;
+				}
 				if (myRequest._element != null)
 					return myRequest._element;
 			}
 		}
-		
 	}
-	
-
 }

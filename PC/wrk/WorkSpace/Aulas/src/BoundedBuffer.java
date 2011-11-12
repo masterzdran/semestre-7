@@ -32,7 +32,7 @@ public final class BoundedBuffer<T> {
 		synchronized (_buffer) {
 			while (true){
 				if(_buffer.size() != 0){
-					T elem = _buffer.remove();
+					T elem = _buffer.remove(0);
 					_buffer.notifyAll();
 					return elem;
 				}
