@@ -1,0 +1,41 @@
+On Stage -1
+
+
+as -o lscboot.bin lscboot.o
+-> Reads and assembles a source file.
+
+ld -T bootrec.ld -o lscboot.bin lscboot.o
+-> ld: GNU linker
+-> "-T" option to replace the default linker script entirely
+
+dd if=/dev/zero of=lsc.fd bs=512 count=2880
+-> dd: convert and copy file
+-> if: read from FILE instead of stdin
+-> of: write to FILE instead of stdout
+-> bs: force ibs=BYTES and obs=BYTES
+-> count: copy only BLOCKS input blocks
+
+dd if=lscboot.bin of=lsc.fd bs=512 count=1 conv=notrunc
+-> conv: convert the file as per the comma separated keyword list
+
+-----------------------------------------------------------------------------------------------------------------
+
+I think that: if file /dev/zero it was copied to lsc.fd and create a empty floppy disk,
+so we can copy file lsc-hd63-flat.img
+About blocks we know that second partition starts on block 43344 and this lenght is 43868160.
+
+I couldn't test because Virtual Machine Ware don't allow me to run from a floppy disk, but any error do not came out.
+I just had to put all path of file .img
+
+
+as -o lscboot.bin lscboot.o
+-> lscboot.s its the same that stage -1
+
+ld -T bootrec.ld -o lscboot.bin lscboot.o
+
+dd if=/home/elvisp/lsc/disks/lsc-hd63-flat.img of=lsc.fd bs=512 count=43868160 seek=43344
+
+dd if=lscboot.bin of=lsc.fd bs=512 count=1 conv=notrunc
+
+
+
