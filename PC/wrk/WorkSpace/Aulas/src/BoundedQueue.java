@@ -5,20 +5,19 @@ public class BoundedQueue<T> {
 	private final LinkedList<T> _buffer;
 	private final LinkedList<TakeRequest<T>> _requests;
 	private final int _capacity;
-	
+
 	private class TakeRequest<T>
 	{
 		public T _element;	
 	}
-	
+
 	public BoundedQueue(int capacity)
 	{
 		_buffer = new LinkedList<T>();
 		_requests = new LinkedList<TakeRequest<T>>();
 		_capacity = capacity;
 	}
-	
-	
+
 	public void put (T elem) throws InterruptedException
 	{
 		synchronized (_buffer) {
@@ -44,18 +43,24 @@ public class BoundedQueue<T> {
 					if(tr._element == null) return;
 				}	
 			}
-			catch (InterruptedException ie){
-				
+			catch (InterruptedException ie)
+			{
+				//em java este if nunca dá true, não há sinalização e cancelamento em simultâneo
+				if(tr._element == null)
+				{
+					Thread.currentThread().interrupt();
+					return;
+				}
+				_requests.remove(tr);
+				throw ie;
 			}
 		}		
 	}
-	
-	
-	
+
 	public T take() throws InterruptedException
 	{
 		synchronized (_buffer) {
-			if(_buffer.size() != 0)
+			if(!_buffer.isEmpty())
 			{
 				T elem = _buffer.removeFirst();
 				if (!_requests.isEmpty())
@@ -67,7 +72,6 @@ public class BoundedQueue<T> {
 				}
 				return elem;
 			}
-			
 			TakeRequest<T> tr = new TakeRequest<T>();
 			_requests.addLast(tr);
 			try{
@@ -77,15 +81,16 @@ public class BoundedQueue<T> {
 					if(tr._element != null) return tr._element;
 				}	
 			}
-			catch (InterruptedException ie){
-				
+			catch (InterruptedException ie)
+			{
+				if(tr._element != null)
+				{
+					Thread.currentThread().interrupt();
+					return tr._element;
+				}
+				_requests.remove(tr);
+				throw ie;
 			}
-			
-			
-		}	
-		
-		
+		}
 	}
-	
-
 }
