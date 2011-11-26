@@ -1,0 +1,59 @@
+Next at t=0
+(0) [0x00000000fffffff0] f000:fff0 (unk. ctxt): jmp far f000:e05b         ; ea5be000f0
+bx_dbg_read_linear: physical memory read error (phy=0x0000000100000000, lin=0x0000000100000000)
+b 0x7c00
+Next at t=1
+(0) [0x00000000000fe05b] f000:e05b (unk. ctxt): xor ax, ax                ; 31c0
+Next at t=2
+(0) [0x00000000000fe05d] f000:e05d (unk. ctxt): out 0x0d, al              ; e60d
+Next at t=3
+(0) [0x00000000000fe05f] f000:e05f (unk. ctxt): out 0xda, al              ; e6da
+Next at t=4
+(0) [0x00000000000fe061] f000:e061 (unk. ctxt): mov al, 0xc0              ; b0c0
+Next at t=5
+(0) [0x00000000000fe063] f000:e063 (unk. ctxt): out 0xd6, al              ; e6d6
+Next at t=6
+(0) [0x00000000000fe065] f000:e065 (unk. ctxt): mov al, 0x00              ; b000
+Next at t=7
+(0) [0x00000000000fe067] f000:e067 (unk. ctxt): out 0xd4, al              ; e6d4
+Next at t=8
+(0) [0x00000000000fe069] f000:e069 (unk. ctxt): mov al, 0x0f              ; b00f
+Next at t=9
+(0) [0x00000000000fe06b] f000:e06b (unk. ctxt): out 0x70, al              ; e670
+Next at t=10
+(0) [0x00000000000fe06d] f000:e06d (unk. ctxt): in al, 0x71               ; e471
+Next at t=11
+(0) [0x00000000000fe06f] f000:e06f (unk. ctxt): mov bl, al                ; 88c3
+Next at t=12
+(0) [0x00000000000fe071] f000:e071 (unk. ctxt): mov al, 0x0f              ; b00f
+Next at t=13
+(0) [0x00000000000fe073] f000:e073 (unk. ctxt): out 0x70, al              ; e670
+Next at t=14
+(0) [0x00000000000fe075] f000:e075 (unk. ctxt): mov al, 0x00              ; b000
+Next at t=15
+(0) [0x00000000000fe077] f000:e077 (unk. ctxt): out 0x71, al              ; e671
+Next at t=16
+(0) [0x00000000000fe079] f000:e079 (unk. ctxt): mov al, bl                ; 88d8
+Next at t=17
+(0) [0x00000000000fe07b] f000:e07b (unk. ctxt): cmp al, 0x00              ; 3c00
+Next at t=18
+(0) [0x00000000000fe07d] f000:e07d (unk. ctxt): jz .+36 (0x000fe0a3)      ; 7424
+Next at t=19
+(0) [0x00000000000fe0a3] f000:e0a3 (unk. ctxt): cli                       ; fa
+Next at t=20
+(0) [0x00000000000fe0a4] f000:e0a4 (unk. ctxt): mov ax, 0xfffe            ; b8feff
+Next at t=21
+(0) [0x00000000000fe0a7] f000:e0a7 (unk. ctxt): mov sp, ax                ; 89c4
+Next at t=22
+(0) [0x00000000000fe0a9] f000:e0a9 (unk. ctxt): xor ax, ax                ; 31c0
+Next at t=23
+(0) [0x00000000000fe0ab] f000:e0ab (unk. ctxt): mov ds, ax                ; 8ed8
+Next at t=24
+(0) [0x00000000000fe0ad] f000:e0ad (unk. ctxt): mov ss, ax                ; 8ed0
+Next at t=25
+(0) [0x00000000000fe0af] f000:e0af (unk. ctxt): mov byte ptr ds:0x4b0, bl ; 881eb004
+Next at t=26
+(0) [0x00000000000fe0b3] f000:e0b3 (unk. ctxt): cmp bl, 0xfe              ; 80fbfe
+Next at t=27
+(0) [0x00000000000fe0b6] f000:e0b6 (unk. ctxt): jnz .+3 (0x000fe0bb)      ; 7503
+(0).[27] [0x00000000000fe0b6] f000:e0b6 (unk. ctxt): jnz .+3 (0x000fe0bb)      ; 7503
