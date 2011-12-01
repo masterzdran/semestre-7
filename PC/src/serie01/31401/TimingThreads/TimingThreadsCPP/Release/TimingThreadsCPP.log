@@ -1,0 +1,37 @@
+﻿Build started 08-11-2011 17:40:31.
+     1>Project "C:\WorkingArea\Programação Concurrente\Serie01\TimingThreads\TimingThreadsCPP\TimingThreadsCPP.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Touching "Release\TimingThreadsCPP.unsuccessfulbuild".
+       GenerateTargetFrameworkMonikerAttribute:
+       Skipping target "GenerateTargetFrameworkMonikerAttribute" because all output files are up-to-date with respect to the input files.
+       ClCompile:
+         All outputs are up-to-date.
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /AI"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" /Zi /clr /nologo /W3 /WX- /O2 /Oy- /D WIN32 /D NDEBUG /D _UNICODE /D UNICODE /EHa /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc100.pdb" /TP /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Core.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Data.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Xml.dll" /analyze- /errorReport:prompt AssemblyInfo.cpp TimingThreadsCPP.cpp /clr:nostdlib 
+         AssemblyInfo.cpp
+         TimingThreadsCPP.cpp
+         Generating Code...
+     1>c:\workingarea\programação concurrente\serie01\timingthreads\timingthreadscpp\timingthreadscpp.cpp(30): warning C4793: 'SwitchingWindowsThreads' : function compiled as native :
+         	Found an intrinsic not supported in managed code
+     1>c:\workingarea\programação concurrente\serie01\timingthreads\timingthreadscpp\timingthreadscpp.cpp(39): warning C4793: 'SwitchingWindowsThreads' : function compiled as native :
+         	Found an intrinsic not supported in managed code
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /clr /nologo /W3 /WX- /O2 /Oy- /D WIN32 /D NDEBUG /D _UNICODE /D UNICODE /EHa /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc100.pdb" /TP /analyze- /errorReport:prompt "C:\Users\Nuno Cancelo\AppData\Local\Temp\.NETFramework,Version=v4.0.AssemblyAttributes.cpp"
+         .NETFramework,Version=v4.0.AssemblyAttributes.cpp
+       ResourceCompile:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /D _UNICODE /D UNICODE /l"0x0409" /nologo /fo"Release\app.res" app.rc 
+       Link:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\WorkingArea\Programação Concurrente\Serie01\TimingThreads\Release\TimingThreadsCPP.exe" /INCREMENTAL:NO /NOLOGO /MANIFEST /ManifestFile:"Release\TimingThreadsCPP.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\WorkingArea\Programação Concurrente\Serie01\TimingThreads\Release\TimingThreadsCPP.pdb" /TLBID:1 /DYNAMICBASE /FIXED:NO /NXCOMPAT /MACHINE:X86 Release\app.res
+         Release\AssemblyInfo.obj
+         Release\stdafx.obj
+         Release\TimingThreadsCPP.obj
+         "Release\.NETFramework,Version=v4.0.AssemblyAttributes.obj"
+         TimingThreadsCPP.vcxproj -> C:\WorkingArea\Programação Concurrente\Serie01\TimingThreads\Release\TimingThreadsCPP.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"C:\WorkingArea\Programação Concurrente\Serie01\TimingThreads\Release\TimingThreadsCPP.exe;#1" /manifest Release\TimingThreadsCPP.exe.intermediate.manifest
+       FinalizeBuildStatus:
+         Deleting file "Release\TimingThreadsCPP.unsuccessfulbuild".
+         Touching "Release\TimingThreadsCPP.lastbuildstate".
+     1>Done Building Project "C:\WorkingArea\Programação Concurrente\Serie01\TimingThreads\TimingThreadsCPP\TimingThreadsCPP.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:03.76
