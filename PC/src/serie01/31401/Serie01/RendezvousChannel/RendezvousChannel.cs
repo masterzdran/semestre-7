@@ -2,58 +2,139 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-/*
- * Implemente   em   C#   o   sincronizador   rendezvous   channel,   com   base   na   
- * classe   genérica RendezvousChannel<S,R>.  
- * O  rendezvous  channel  serve  para  sincronizar  a  comunicação  entre threads cliente e threads servidoras, 
- * com a seguinte semântica: 
- * -> 
- */
+using System.Threading;
 
-
-namespace Serie01
+namespace RendezvousChannel
 {
-    class RendezvousChannel<S,R>
+    class RendezvousChannel<S, R>
     {
-        public RendezvousChannel();
-        /*
-         * As  threads  cliente  realizam  pedidos  de   serviço  invocando  o   método   
-         *      bool  Request(S service,  int  timeout,  out  R  response).  
-         * O  objecto,  do  tipo  S,  passado  através  do parâmetro  service  descreve  o  pedido  de  serviço.  
-         * Se  o  serviço  for  executado  com  sucesso  por uma thread servidora, este método devolve true 
-         * e a resposta ao pedido de serviço, um objecto do tipo R, é passada através do parâmetro response; 
-         * Se pedido de serviço não for aceite de imediato, por  não  existir  nenhuma  thread  servidora  disponível,
-         * a  thread  cliente  fica  bloqueada  até  que  o pedido  de  serviço  seja  aceite,  a  thread  cliente  seja
-         * interrompida  ou  expire  o  limite  de  tempo especificado  através  do  parâmetro  timeout.  
-         * (Quando  existe  desistência  o  método  Request devolve false.) 
-         * Dado que não está prevista nenhuma forma de interromper o processamento de um pedido de serviço já aceite 
-         * por uma thread servidora, as threads cliente não poderão desistir, devido  a  interrupção  ou  timeout,  
-         * após  terem  iniciado  o  rendezvous  com  uma  thread  servidora, devendo  esperar  incondicionalmente  que
-         * o  serviço  seja  concluído,  isto  é,  a  thread  servidora invoque o método Reply, com o respectivo 
-         * rendezvous token.
-         */
-        public bool Request(S service, int timeout, out  R response);
-        /* Sempre que uma thread servidora estiver em condições de processar pedidos de serviço, invoca o método 
-         *      object Accept (int timeout, out S service). 
-         * Quando um pedido de serviço é aceite,  a  descrição  do  pedido  de  serviço  é  passado  através  do  
-         * parâmetro  de  saída  service  e  o método  Accept  devolve  também  um  rendezvous  token  
-         * (i.e.,  um  objecto  opaco,  cujo  tipo  é definido  pela  implementação)  para  identificar  um  
-         * rendezvous  particular.  
-         * Quando  não  existe nenhum pedido de serviço pendente, a thread servidora fica bloqueada até que seja 
-         * solicitado um pedido de serviço, seja interrompida ou expire o limite de tempo especificado através do 
-         * parâmetro timeout.  
-         * (Este  método  deve  devolver  null  como  rendezvous  token  para  indicar  que  a  thread servidora 
-         * retornou por desistência.)          
-         */
-        public object Accept(int timeout, out S service);
+        sealed class RequestItem<S, R>
+        {
+            public RequestItem(S service, R request)
+            {
+                this.Request = service;
+                this.Response = request;
+                this.State = false;
+            }
+            public S Request { get; set; }
+            public R Response { get; set; }
+            public Boolean State { get; set; }
+        }
 
-        /*Quando  uma  thread  servidora  quer  indicar  a  conclusão  de  um  serviço  particular  
-         * (definido  pelo respectivo   rendezvous   token)   e   devolver   o   respectivo   resultado,
-         * invoca   o   método   
-         *      void Reply(object rendezVousToken, R response). 
-         * Através do primeiro parâmetro é passada a identificação do rendezvous e através do parâmetro response
-         * o objecto do tipo R, que contém a resposta ao pedido de serviço.
-         */
-        public void Reply(object rendezVousToken, R response);
+        readonly LinkedList<RequestItem<S, R>> _clientRequest;
+        readonly LinkedList<Object> _serverRequest;
+
+        public RendezvousChannel()
+        {
+            _clientRequest = new LinkedList<RequestItem<S, R>>();
+            _serverRequest = new LinkedList<object>();
+        }
+
+        public bool Request(S service, int timeout, out  R response)
+        {
+            lock (_serverRequest)
+            {
+                RequestItem<S, R> request = new RequestItem<S, R>(service, default(R));
+                LinkedListNode<RequestItem<S, R>> requestNode = _clientRequest.AddLast(request);
+
+                if (_serverRequest.Count > 0)
+                {
+                    SyncUtils.Notify(_serverRequest, _serverRequest.First);
+                }
+                int endtime = (timeout > 0) ? timeout + Environment.TickCount : 0;
+                while (true)
+                {
+                    try
+                    {
+                        if (!requestNode.Value.State)
+                        {
+                            SyncUtils.Wait(_serverRequest, requestNode, timeout);
+                        }
+                    }
+                    catch (ThreadInterruptedException)
+                    {
+                        response = requestNode.Value.Response;
+                        if (requestNode.Value.State)
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            _clientRequest.Remove(requestNode);
+                            Thread.CurrentThread.Interrupt();
+                        }
+                        throw;
+                    }
+                    
+                    if (requestNode.Value.State)
+                    {
+                        _clientRequest.Remove(requestNode);
+                        response = requestNode.Value.Response;
+                        return true;
+                    }
+                    if (Environment.TickCount > endtime && endtime != 0)
+                    {
+                        _clientRequest.Remove(requestNode);
+                        response = default(R);
+                        return false;
+                    }
+                }
+            }
+        }
+
+
+        public object Accept(int timeout, out S service)
+        {
+            lock (_serverRequest)
+            {
+                RequestItem<S, R> request = null;
+                Object serverThread = new Object();
+                int endTime = (timeout > 0) ? timeout + Environment.TickCount : 0;
+                _serverRequest.AddLast(serverThread);
+
+                while (true)
+                {
+                    try
+                    {
+                        if (_clientRequest.Count > 0)
+                        {
+                            request = _clientRequest.First.Value;
+                            _clientRequest.RemoveFirst();
+                            service = request.Request;
+                            _serverRequest.Remove(serverThread);
+                            return request;
+                        }
+                        else
+                        {
+                            SyncUtils.Wait(_serverRequest, serverThread, timeout);
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        _serverRequest.Remove(serverThread);
+                        if (request == null)
+                            throw;
+
+                        service = request.Request;
+                        _clientRequest.Remove(request);
+                        Thread.CurrentThread.Interrupt();
+                        throw;
+                    }
+                    _serverRequest.Remove(serverThread);
+                    if (Environment.TickCount > endTime && endTime != 0)
+                    {
+                        service = default(S);
+                        return false;
+                    }
+                }
+            }
+        }
+
+        public void Reply(object rendezVousToken, R response)
+        {
+            RequestItem<S, R> request = rendezVousToken as RequestItem<S, R>;
+            request.Response = response;
+            SyncUtils.Notify(_serverRequest, request.Response);
+        }
     }
 }
