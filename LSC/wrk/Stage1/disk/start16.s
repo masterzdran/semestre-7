@@ -5,12 +5,12 @@
       .equ   START16_SEG, 0x1000
       .equ   GET_VIDEO_MODE, 0x4f00
       .equ   GET_VIDEO_MODE_DETAIL, 0x4f01
+			.equ	 VIDEO_MODES, 0x6	
+
 
       .section .rodata
 VESA_MAGIC:	
       .ascii "VBE2"
-
-
                             
       .text
       .code16
@@ -18,6 +18,30 @@ VESA_MAGIC:
 start16:
       movw   $START16_SEG, %ax
       movw   %ax, %ds
+
+      # GET VESA INFO
+      movl  VESA_MAGIC, %eax			#move VBE2 to begin of signature
+      movl  %eax, signature     
+      movl  $vesa_info, %edi			#es:di points to vesa_info
+      movw  $START16_SEG, %ax
+      movw  %ax, %es     
+      movw  $GET_VIDEO_MODE, %ax
+      int   $0x10
+
+			#####at this point es:di have list of available video modes
+
+      # GET VESA INFO DETAIL
+
+get_vesa_info_detail:
+      movw  $6, %cx 
+      movl  $vesa_mode_info, %edi
+      movw  %ds, %ax
+      movw  %ax, %es 
+      
+      movw  $GET_VIDEO_MODE_DETAIL, %ax
+      int   $0x10
+
+
 
       # Save boot drive id
       
@@ -34,41 +58,6 @@ start16:
       orb    $0x02, %al
       andb   $0xfe, %al
       outb   %al, $0x92
-	
-      # GET VESA INFO
-      
-      movl  VESA_MAGIC, %eax
-      movl  %eax, signature
-      
-        #es:di points to vesa_info
-      movl  $vesa_info, %edi
-      movw  %ds, %ax
-      movw  %ax, %es      
-       
-      movw  $GET_VIDEO_MODE, %ax
-      int   $0x10
-
-
-   
-
-      # GET VESA INFO DETAIL
-      
-get_vesa_info_detail:
-      movw  <video_mode>, %cx 
-      movl  $vesa_mode_info, %edi
-      movw  %ds, %ax
-      movw  %ax, %es 
-      
-      movw  $GET_VIDEO_MODE_DETAIL, %ax
-      int   $0x10
-
-
-
-
-
-
-
-
 
       # Build page tables
 
@@ -133,17 +122,23 @@ gdt_ptr:
       .long  (START16_SEG*16+gdt)
       .long  0
 
+
+
       .data
 
+vesa_info_array:
+		.space		VIDEO_MODES*256
+
+
 vesa_info:
-		signature:			   .long
+		signature:			   	.long
 		version:			      .word
-		vendor_str_off:		.word
-		vendor_str_seg:		.word
-		capabilities:		   .long
+		vendor_str_off:			.word
+		vendor_str_seg:			.word
+		capabilities:		   	.long
 		video_mode_ptr:   	.long    #offset + seg
-		total_memory:		   .word
-                           .space	748
+		total_memory:		   	.word
+                        .space	748
 
 vesa_mode_info:
       mode_attr:           .word 0
@@ -183,8 +178,5 @@ vesa_mode_info:
       offscreen_size:      .word 0
       
       reserved:            .space 206 
-
-
-
 
 .end
