@@ -8,18 +8,21 @@ namespace Ficha1
 {
     public class Exchanger<T>
     {
-        private readonly ThreadMessage _threadMessage;
-        private bool _fulfilled;
+        private ThreadMessageRequest _threadMessageRequest;
 
-        class ThreadMessage 
+        class ThreadMessageRequest 
         {
             public T _message;
+
+            public ThreadMessageRequest(T message)
+            {
+                _message = message;
+            }
         }
 
         public Exchanger()
         {
-            _fulfilled = false;
-            _threadMessage = new ThreadMessage();
+            _threadMessageRequest = null;
         }
 
         
@@ -27,64 +30,51 @@ namespace Ficha1
 
         public bool Exchange(T mine, int timeout, out T yours)
         {
-            lock (_threadMessage)
+            lock (_threadMessageRequest)
             {
-                if (_threadMessage._message.Equals(default(T)))
+                if (_threadMessageRequest == null)
                     //first thread to arrive
                 {
-                    _threadMessage._message = mine;
+                    ThreadMessageRequest MyRequest = new ThreadMessageRequest(mine);
+                    _threadMessageRequest = MyRequest;
                     try
                     {
-                        bool timedOut = Monitor.Wait(_threadMessage, timeout);
-                        if (timedOut)
+                        Monitor.Wait(_threadMessageRequest, timeout);
+                        //if message was delivered "at the same time" than the timeout gets answer and returns with true
+                        if (_threadMessageRequest == null)
                         {
-                            //check if the 2nd message was already there when timed out
-                            //if it was it has to take it anyway
-                            yours = default(T);
-                            if (!_fulfilled)
-                            {
-                                _threadMessage._message = default(T);
-                                return false;
-                            }
-                            yours = _threadMessage._message;
-                            _threadMessage._message = default(T);
-                            _fulfilled = false;
+                            yours = MyRequest._message;
                             return true;
                         }
-                        else
-                        {
-                            //if not timedout then was pulsed and message is from other thread
-                            yours = _threadMessage._message;
-                            _threadMessage._message = default(T);
-                            _fulfilled = false;
-                            return true;
-                        }
+                        //remove request from queue
+                        _threadMessageRequest = null;
+                        yours = default(T);
+                        return false;
                     }
                     catch (Exception)
                     {
-                        if(!_fulfilled)
+                        if (_threadMessageRequest == null)
                         {
-                            _threadMessage._message = default(T);
-                            yours = default(T);
+                            yours = MyRequest._message;
                             Thread.CurrentThread.Interrupt();
-                            return false;
+                            return true;
                         }
-                        yours = _threadMessage._message;
-                        _threadMessage._message = default(T);
-                        _fulfilled = false;
+                        _threadMessageRequest = null;
+                        yours = default(T);
                         Thread.CurrentThread.Interrupt();
-                        return true;
+                        return false;
                     }
                 }
-                else if(!_fulfilled)
+                else
+                    //some thread already requested a message so exchange them
                 {
-                    yours = _threadMessage._message;
-                    _threadMessage._message = mine;
-                    _fulfilled=true;
-                    Monitor.Pulse(_threadMessage);
+                    yours = _threadMessageRequest._message;
+                    _threadMessageRequest._message = mine;
+                    //removes request from queue
+                    _threadMessageRequest = null;
+                    Monitor.Pulse(_threadMessageRequest);
                     return true;
                 }
-                return false;
             }
         }
     }
