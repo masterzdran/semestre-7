@@ -1,0 +1,13 @@
+C:\WorkingArea\Programação Concurrente\Serie01\TimingThreads\TimingThreadsC\bin\Release\TimingThreadsC.dll
+C:\WorkingArea\Programação Concurrente\Serie01\TimingThreads\TimingThreadsC\bin\Release\TimingThreadsC.pdb
+C:\WorkingArea\Programação Concurrente\Serie01\TimingThreads\TimingThreadsC\obj\Release\ResolveAssemblyReference.cache
+C:\WorkingArea\Programação Concurrente\Serie01\TimingThreads\TimingThreadsC\obj\Release\Activity1.g.xaml
+C:\WorkingArea\Programação Concurrente\Serie01\TimingThreads\TimingThreadsC\obj\Release\_TimingThreadsC.g.cs
+C:\WorkingArea\Programação Concurrente\Serie01\TimingThreads\TimingThreadsC\obj\Release\Activity1.g.cs
+C:\WorkingArea\Programação Concurrente\Serie01\TimingThreads\TimingThreadsC\obj\Release\TimingThreadsCSharp.csproj.XamlGeneratedCodeFileListAbsolute.txt
+C:\WorkingArea\Programação Concurrente\Serie01\TimingThreads\TimingThreadsC\obj\Release\TimingThreadsCSharp.csproj.XamlGeneratedXamlFileListAbsolute.txt
+C:\WorkingArea\Programação Concurrente\Serie01\TimingThreads\TimingThreadsC\obj\Release\InProcessTempFiles\Activity1.g.cs
+C:\WorkingArea\Programação Concurrente\Serie01\TimingThreads\TimingThreadsC\obj\Release\InProcessTempFiles\Activity1.g.xaml
+C:\WorkingArea\Programação Concurrente\Serie01\TimingThreads\TimingThreadsC\obj\Release\InProcessTempFiles\_TimingThreadsC.g.cs
+C:\WorkingArea\Programação Concurrente\Serie01\TimingThreads\TimingThreadsC\obj\Release\TimingThreadsC.dll
+C:\WorkingArea\Programação Concurrente\Serie01\TimingThreads\TimingThreadsC\obj\Release\TimingThreadsC.pdb
