@@ -29,7 +29,7 @@ public final class SemaphoreFifo
 
     }
 
-    public Boolean P(int units, int timeout)
+    public Boolean P(int units, long timeout) throws InterruptedException
     {
         try
         {
@@ -40,7 +40,7 @@ public final class SemaphoreFifo
                 _currentUnits -= units;
                 return true;
             }
-            int arrivedTime = timeout != Timeout.Infinity ? Environment.TickCount : Timeout.Infinity;
+            long arrivedTime = timeout != 0 ? System.currentTimeMillis() : 0; //0 = tempo infinito
             Request myreq = new Request();
             myreq._owned = _currentUnits;
             myreq._required = units;
