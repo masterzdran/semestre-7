@@ -1,0 +1,222 @@
+Partition Table starts at offset 446 and has the length 4 x 16 bytes (64 bytes) (at the end of MBR)
+
+   |00| 01 02 03| 04| 05 06 07| 08 09 0A 0B| 0C 0D 0E 0F|
+   |--|---------|---|---------|------------|------------|
+   | A|CHS FIRST| T | CHS LAST|  LBA START |LBA COUNT   |
+   |--|---------|---|---------|------------|------------|
+                                                |
+                                                |--------> Total Number of sectors in partition
+                                    |
+                                    |--------> Linear absolute address of first sector in partition
+                        |
+                        |--------> CHS absolute address of the last sector in partition
+                  |
+                  |--------> Partition Type
+         |
+         |-------->CHS absolute address of first sector in partition
+    |
+    |-------->Active Partition: 0x80 else 0x00
+    
+    
+masterzdran@TahuwaHuwai: hd  -s 446 -n 64 lsc-hd63-flat.img
+
+000001be  |80|01 01 00|04|0f 3f 2a|3f 00 00 00|11 a9 00 00|  |......?*?.......|
+000001ce  |00|00 01 2b|06|0f 3f 7f|50 a9 00 00|b0 4e 01 00|  |...+..?.P....N..|
+000001de  |00|00 00 00|00|00 00 00|00 00 00 00|00 00 00 00|  |................|
+*
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+masterzdran@TahuwaHuwai: sudo losetup -f
+/dev/loop0
+masterzdran@TahuwaHuwai: sudo losetup /dev/loop0 /home/masterzdran/WorkingArea/Isel/semestre-7/LSC/src/31401/overture/dsk/lsc-hd63-flat.img 
+masterzdran@TahuwaHuwai: sudo fdisk -lu /dev/loop0
+Disk /dev/loop0: 66 MB, 66060288 bytes
+16 heads, 63 sectors/track, 128 cylinders, total 129024 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk identifier: 0x00000000
+
+      Device Boot      Start         End      Blocks   Id  System
+/dev/loop0p1   *          63       43343       21640+   4  FAT16 <32M
+/dev/loop0p2           43344      129023       42840    6  FAT16
+
+43343 - 63 + 1 = 43281 * 512 = 22159872 bytes = 21640.5 MiB
+129023 - 43344 + 1 = 85680 * 512 = 43868160 bytes = 42840 MiB
+
+
+t -> 2 -> 81 -> w
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Partition	Start offset	Length
+#1			   63 * 512		   22159872
+#2			   43344 * 512		43868160
+
+Partition	Start offset	Length
+#1			   32256		      22159872
+#2			   22192128 		43868160 
+
+MAN:
+losetup [{-e|-E} encryption] [-o offset] [--sizelimit limit]  [-p pfd] [-r] {-f[--show]|loopdev} file
+
+masterzdran@TahuwaHuwai: sudo losetup -o 32256 --sizelimit 22159872 /dev/loop1 ./lsc-hd63-flat.img
+masterzdran@TahuwaHuwai: sudo losetup -o 22192128  --sizelimit 43868160 /dev/loop2 ./lsc-hd63-flat.img
+
+masterzdran@TahuwaHuwai:~/WorkingArea/Isel/semestre-7/LSC/src/31401/overture/dsk$ sudo fsck.msdos -v /dev/loop1
+dosfsck 3.0.9 (31 Jan 2010)
+dosfsck 3.0.9, 31 Jan 2010, FAT32, LFN
+Checking we can access the last sector of the filesystem
+Boot sector contents:
+System ID "FreeDOS "
+Media byte 0xf8 (hard disk)
+       512 bytes per logical sector
+      2048 bytes per cluster
+         1 reserved sector
+First FAT starts at byte 512 (sector 1)
+         2 FATs, 16 bit entries
+     22016 bytes per FAT (= 43 sectors)
+Root directory starts at byte 44544 (sector 87)
+       512 root directory entries
+Data area starts at byte 60928 (sector 119)
+     10790 data clusters (22097920 bytes)
+63 sectors/track, 16 heads
+        63 hidden sectors
+     43281 sectors total
+Checking for unused clusters.
+/dev/loop1: 70 files, 593/10790 clusters
+
+masterzdran@TahuwaHuwai: sudo mkfs.minix -v /dev/loop2
+14288 inodes
+42840 blocks
+Firstdatazone=903 (903)
+Zonesize=1024
+Maxsize=2147483647
+
+masterzdran@TahuwaHuwai: sudo fsck.minix -vfs /dev/loop2
+Forcing filesystem check on /dev/loop2.
+14288 inodes
+42840 blocks
+Firstdatazone=903 (903)
+Zonesize=1024
+Maxsize=2147483647
+Filesystem state=1
+namelen=30
+
+
+     1 inodes used (0%)
+   904 zones used (2%)
+
+     0 regular files
+     1 directories
+     0 character device files
+     0 block device files
+     0 links
+     0 symbolic links
+------
+     1 files
+
+Size Bytes / Block = Byte/Block
+43868160   / 42840 = 1024 (Block size == Zone size)
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Making a VBR
+
+--------------------------------------------------------> Boot Block = 1 Block. Contains Boot record  
+ |  ----------------------------------------------------> Super Block = 1 Block. Contains Information about the layout of the filesystem
+ |  |  -------------------------------------------------> INodes Bitmap.  The I-nodes bitmap area has one bit per existing i-node and is used to find free i-nodes in the I-nodes area 
+ |  |  |        ----------------------------------------> Zone Bitmap. has one bit for each zone in the Data area and is used to find free zones in it
+ |  |  |        |			--------------------------------> INodes. Each inode take 64 bytes and hold metadata. The number of blocks used for i-nodes is decided at format time and is stored in the superblock.
+ |  |  |        |			|              -----------------> Data. Its blocks are grouped into zones, with each zone representing 2n blocks, for some n >= 0.
+ |  |  |        |			|              |
+ |  |  |        |			|			   |
+ _  _  _______  __________  _____________  _______________________________
+ -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 
+| || || || || || || || || || || || || || || || || || || || || || || || || |
+ -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 
+
+
+/*
+ * The new minix inode has all the time entries, as well as
+ * long block numbers and a third indirect block (7+1+1+1
+ * instead of 7+1+1). Also, some previously 8-bit values are
+ * now 16-bit. The inode is now 64 bytes instead of 32.
+   = 16 + 16 + 16 + 16 + 32 + 32 + 32 + 32 + 32*10 = 512 bytes
+ */
+struct minix2_inode {
+	__u16 i_mode;
+	__u16 i_nlinks;
+	__u16 i_uid;
+	__u16 i_gid;
+	__u32 i_size;
+	__u32 i_atime;
+	__u32 i_mtime;
+	__u32 i_ctime;
+	__u32 i_zone[10];
+};
+
+/*
+ * minix super-block data on disk
+   = 16 + 16 + 16 + 16 + 16 + 16 + 32 + 16 + 16 + 32 = 192 bytes
+ */
+struct minix_super_block {
+	__u16 s_ninodes;
+	__u16 s_nzones;
+	__u16 s_imap_blocks;
+	__u16 s_zmap_blocks;
+	__u16 s_firstdatazone;
+	__u16 s_log_zone_size;
+	__u32 s_max_size;
+	__u16 s_magic;
+	__u16 s_state;
+	__u32 s_zones;
+};
+/*
+= 24 bytes
+*/
+struct minix_dir_entry {
+	__u16 inode;
+	char name[0];
+};
+
+Partition Start/Boot Block : 22192128                                   = 22192128
+SuperBlock				      : 22192128 + 1024                            = 22193152
+Inodes Bitmap			      : 22192128 + 1024 + 1024                     = 22194176
+Zone Bitmap				      : 22192128 + 1024 + 1024 + 2 * 1024          = 22196224
+Inodes					      : 22192128 + 1024 + 1024 + 2 * 1024 + 6*1024 = 22202368
+Data					  :
+
+
+
+== SuperBlock ==
+sudo hd lsc-hd63-flat.img  -s 22193152 -n 1024
+
+0152a400  d0 37 00 00 02 00 06 00  87 03 00 00 ff ff ff 7f  |.7..............|
+0152a410  78 24 00 00 58 a7 00 00  00 00 00 00 00 00 00 00  |x$..X...........|
+0152a420  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+
+== Inodes Bitmap ==
+sudo hd lsc-hd63-flat.img  -s 22194176 -n 2048
+0152a800  03 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+0152a810  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+0152aef0  00 00 00 00 00 00 00 00  00 00 fe ff ff ff ff ff  |................|
+0152af00  ff ff ff ff ff ff ff ff  ff ff ff ff ff ff ff ff  |................|
+*
+0152b000
+
+== Zone Bitmap == 
+sudo hd lsc-hd63-flat.img  -s 22196224 -n 8192
+0152b000  03 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+0152b010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+0152c470  00 00 00 00 00 00 00 00  00 00 fc ff ff ff ff ff  |................|
+0152c480  ff ff ff ff ff ff ff ff  ff ff ff ff ff ff ff ff  |................|
+*
+0152c800  ed 41 02 00 e8 03 e8 03  40 00 00 00 8e 3e e6 4e  |.A......@....>.N|
+0152c810  a6 3c e6 4e 42 3e e6 4e  87 03 00 00 00 00 00 00  |.<.NB>.N........|
+0152c820  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+0152d000
