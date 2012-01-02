@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+  <link rel="stylesheet" href="http://code.jquery.com/qunit/git/qunit.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="http://code.jquery.com/qunit/git/qunit.js"></script>
+
+  <script type="text/javascript">
+      $(document).ready(function () {
+          // clear text from input
+          $(".suggestionsinput").click(function () {
+              if ($(".suggestionsinput").val() == "Search") {
+                  $(".suggestionsinput").val("");
+              }
+          })
+
+          // check if key has been pressed
+          $(".suggestionsinput").keyup(function (event) {
+              if ($(".suggestionsinput").val() != "") {
+                  // make suggestions visible
+                  $("#suggestions").fadeIn('slow');
+                  $('input#suggestBox').jsonSuggest(testData.countryCodes, { onSelect: callback });
+                  $(".searchterm").append("<tr><td>" + $(".suggestionsinput").val() + "</td></tr>");
+                  // $("#suggestions").load('http://URL.to.load');
+
+              } else {
+                  // hide suggestions
+                  $("#suggestions").fadeOut('slow');
+                  $(".searchterm").empty();
+
+              }
+          })
+
+
+      });
+  </script>
+
+
+  
+</head>
+  <body>
+    <form>
+    <div>
+        <input type="text" name="suggestions" class="suggestionsinput" value="Search" />
+        	<div id="suggestions">
+		            <!--Suggestions for <span class="searchterm"></span>...-->
+                    <table class="searchterm">
+                    </table>
+	        </div>
+    </div>
+    </form>
+  </body>
+</html>
