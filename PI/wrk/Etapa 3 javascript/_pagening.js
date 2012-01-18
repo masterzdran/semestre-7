@@ -30,7 +30,7 @@ $(changeToScroll = function()
 					$('#CufList').append("<li><a href='/CUF/Official/Detail/PE'>Probabilidade e Estatistica</a></li>");
 				}
 				//Button scroll to bottom.
-				$('#CufListDiv').animate({scrollTop: $('.span4').innerHeight()},1000);
+				$('#CufListDiv').animate({scrollTop: $('#CufListDiv').innerHeight()},1000);
 			});
 		//Cuf List CSS
 		$("#CufListDiv")
