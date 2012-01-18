@@ -67,8 +67,8 @@ $(changeToPages = function ()
 			var t = "p"+i;
 			var c = i;
 			p.id = t;
-			p.title = t;
-			ptext = 
+			p.title = "Page n. "+i  ;
+			p.onclick =  call(i);
 			p.appendChild(document.createTextNode("  "+c+"  "));
 
 			pag.appendChild(p);
@@ -81,9 +81,9 @@ $(changeToPages = function ()
 		.css("border", "2px solid red").css("text-align","center")
 		.css("display"," table-cell").css("vertical-align","middle");
 		
-		for (var i = 0; i< pages;++i){
+		/*for (var i = 0; i< pages;++i){
 			$("#p"+i).click(call(i));
-		}
+		}*/
 		//Cuf List CSS
 		$("#CufListDiv")
 		.css('height','300px').css('width','400px')
