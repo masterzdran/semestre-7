@@ -15,9 +15,11 @@ $(changeToScroll = function()
 		
 		//'Button' Definition CSS
 		$("#WatchMoreBotton")
+		/*
 		.css('height','50px').css('width','400px')
 		.css("border", "2px solid red").css("text-align","center")
-		.css("display"," table-cell").css("vertical-align","middle")							
+		.css("display"," table-cell").css("vertical-align","middle")
+		*/
 		;
 		
 		//Button Function
@@ -34,8 +36,11 @@ $(changeToScroll = function()
 			});
 		//Cuf List CSS
 		$("#CufListDiv")
+		/*
 		.css('height','300px').css('width','400px')
-		.css('overflow','auto').css('border','1px solid gray');
+		.css('overflow','auto').css('border','1px solid gray')
+		*/
+		;
 		return this;
 	}
 	
@@ -67,6 +72,7 @@ $(changeToPages = function ()
 			var t = "p"+i;
 			var c = i;
 			p.id = t;
+			p.className="pagening";
 			p.title = "Page n. "+i  ;
 			p.onclick =  call(i);
 			p.appendChild(document.createTextNode("  "+c+"  "));
@@ -77,17 +83,23 @@ $(changeToPages = function ()
 		$("#PageNavigationDiv").append(pag);
 		//'Button' Definition CSS
 		$("#WatchMoreBotton")
+		/*
 		.css('height','50px').css('width','400px')
 		.css("border", "2px solid red").css("text-align","center")
-		.css("display"," table-cell").css("vertical-align","middle");
+		.css("display"," table-cell").css("vertical-align","middle")
+		*/
+		;
 		
 		/*for (var i = 0; i< pages;++i){
 			$("#p"+i).click(call(i));
 		}*/
 		//Cuf List CSS
 		$("#CufListDiv")
+		/*
 		.css('height','300px').css('width','400px')
-		.css('overflow','auto').css('border','1px solid gray');
+		.css('overflow','auto').css('border','1px solid gray')
+		*/
+		;
 		return this;
 	}
 );
