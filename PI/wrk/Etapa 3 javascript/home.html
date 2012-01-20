@@ -3,86 +3,95 @@
 	<head>
 		<title>Page List of Official CUFs</title>
 		<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css" type="text/css" media="all" />
+		<link rel="stylesheet" href="_pagening.css" type="text/css" media="all" />
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" type="text/javascript"></script>
 		<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
 		<script src="_pagening.js" type="text/javascript"></script>
 		
 		<script type="text/javascript">
-					var order = "asc";
-					var itemPerPage = 2;
-			$(	
-
-				// -------------- ItemsOrderDiv -------------- 
-				function(){
-
-					$('#ItemsOrderDiv').empty();
-					$('#ItemsOrderDiv')
-						.append("<LABEL>Order</LABEL>")
-						.append("<LABEL id='orderAsc'>[ ASC ]</LABEL>")
-						.append("<LABEL id='orderDesc'>[ DESC ]</LABEL>");
-					$('#orderAsc').click(function(e)
+			// -------------- ItemsOrderDiv --------------
+			$(function(){
+					$('#ItemsOrderDiv').change(function(e)
 						{
 							e.preventDefault();
-							order= "asc"; alert(order);
-						}
-					);
-					$('#orderDesc').click(function(e)
-						{
-							e.preventDefault();
-							order= "Desc";alert(order);
+							alert($('#ItemsOrderDiv :selected').text());
 						}
 					);
 				}
-				// -------------- ItemsNbrDiv --------------
+			// -------------- ItemsNbrDiv --------------
 			);
-			$(
-				function(){
-					$("#ItemsNbrDiv").empty();
-					$("#ItemsNbrDiv")
-						.append("<LABEL>Page Items</LABEL>")
-						.append("<LABEL id='items01' onclick='myclick(1)'>[ 1 ]</LABEL>")
-						.append("<LABEL id='items02' onclick='myclick(2)'>[ 2 ]</LABEL>")
-						.append("<LABEL id='items05' onclick='myclick(5)'>[ 5 ]</LABEL>")
-						.append("<LABEL id='items10' onclick='myclick(10)'>[ 10 ]</LABEL>");
+			$(function(){
+						$('#ItemsNbrDiv').change(function(e)
+						{
+							e.preventDefault();
+							alert($('#ItemsNbrDiv :selected').val());
+						}
+					);
 				}
 			);
-			function myclick(e){
-				itemPerPage= e;
-				
-				alert(itemPerPage);
-			} 
-
+			// -------------- Items Form Submit --------------
+			$(function(){
+					$('#ItemsForm').submit(
+						function (e){
+							e.preventDefault();
+							$("#WatchMoreBotton").click();
+						}
+					);					
+				}
+			);
+			// -------------- View Paged or Infinite Scroll--------------
+			$(function(){
+				$("#ItemsAndOrder").append("<label id='itemsView'>View List Mode</label>");
+				$("#itemsView").click(
+					function()
+					{
+						if ($("#itemsView").text() == "View List Mode"){
+							$("#itemsView").text("View Scroll Mode");
+							changeToScroll();
+						}else if ($("#itemsView").text() == "View Scroll Mode"){
+							$("#itemsView").text("View List Mode");
+							changeToPages();
+						} 
+					}
+				);
+			});
 		</script>
 	</head>
 	<body>
 		<div class="page">
 			<div id="main">
 				<h2>Page List of Official CUFs</h2>
-				<span id = "ItemsOrderDiv"> 
-					<label>Order</label> 
-					<label> [ <a href="/CUF/Official/Page?pagenr=0&amp;itemsnr=10&amp;order=Asc">Asc</a> ] </label> 
-					<label> [ <a href="/CUF/Official/Page?pagenr=0&amp;itemsnr=10&amp;order=Des">Des</a> ] </label> 
-				</span>
-				<span id = "ItemsNbrDiv"> 
-					<label>Page</label> 
-					<label> [ <a href="/CUF/Official/Page?pagenr=0&amp;itemsnr=1&amp;order=Asc">1</a> ] </label> 
-					<label> [ <a href="/CUF/Official/Page?pagenr=0&amp;itemsnr=2&amp;order=Asc">2</a> ] </label> 
-					<label> [ <a href="/CUF/Official/Page?pagenr=0&amp;itemsnr=5&amp;order=Asc">5</a> ] </label> 
-					<label> [ <a href="/CUF/Official/Page?pagenr=0&amp;itemsnr=10&amp;order=Asc">10</a> ] </label> 
-				</span>
 				
-				<div id = "CufListDiv" >
-					<div   class="span4">
-						<ul id='CufList'>
-							<li>
-								<a href="/CUF/Official/Detail/M1">Matematica 1</a>
-							</li>
-							<li>
-								<a href="/CUF/Official/Detail/M2">Matematica 2</a>
-							</li>
-						</ul>
-					</div>
-				</div>
+			<div id='ItemsAndOrder'>
+				<form id='ItemsForm' action="http://www.google.com" method="GET">
+				  <label for="ctrlOrder">Order:</label>
+				  <select name="order" id="ItemsOrderDiv">
+				    <option value="Asc">Asc</option>
+				    <option value="Desc">Des</option>
+				  </select>
+  			      
+  			      <label for="ctrlPage">Page:</label>
+				  <select name="itemsnr" id="ItemsNbrDiv">
+				    <option value="1">1</option>
+				    <option value="2">2</option>
+				    <option value="5">5</option>
+				    <option value="10">10</option>				    
+				  </select>
+				<input type="submit" name="action" value="show" />
+				</form>
+			</div>
+			<div id = "CufListDiv" >
+				<!--<div class="span4">-->
+					<ul id='CufList'>
+						<li>
+							<a href="/CUF/Official/Detail/M1">Matematica 1</a>
+						</li>
+						<li>
+							<a href="/CUF/Official/Detail/M2">Matematica 2</a>
+						</li>
+					</ul>
+				<!--</div>-->
+			</div>
 				<div id = "PageNavigationDiv" >
 					<label> [0] </label>
 				</div>

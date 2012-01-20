@@ -1,0 +1,20 @@
+#WatchMoreBotton{
+		height: 50px;
+		width: 400px;
+		border: 2px solid red;
+		text-align:center;
+		display:table-cell;
+		vertical-align:middle;
+}
+#CufListDiv{
+		height:300px;
+		width:400px;
+		overflow:auto;
+		border:1px solid gray;
+}
+.pagening{
+		height: 25px;
+		width: 25px;
+		border: 2px solid red;
+		display: inline-table;
+}
