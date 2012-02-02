@@ -1,9 +1,19 @@
-sudo mkdir /mnt/lsc
-sudo chown nuno.nuno /mnt/lsc
-mkdir /mnt/lsc/hd0p1
-mkdir /mnt/lsc/hd0p2
+#home="/media/DATA/ISEL/Semestre7"
+#username=nuno
+home="/home/masterzdran/WorkingArea/Isel/semestre-7" 
+username=masterzdran
 
-sudo mount /media/DATA/ISEL/Semestre7/LSC/dsk/lsc-hd63-flat.img /mnt/lsc/hd0p1 -o loop,offset=32256,sizelimit=22159872,nodev,noexec,rw,users,uid=1000,gid=1000
-sudo mount /media/DATA/ISEL/Semestre7/LSC/dsk/lsc-hd63-flat.img /mnt/lsc/hd0p2 -o loop,offset=22192128,sizelimit=43868160,nodev,noexec,rw,users,uid=1000,gid=1000
+if [ ! -d /mnt/lsc ];then
+  sudo mkdir /mnt/lsc
+  sudo chown $username.$username /mnt/lsc
+fi
+if [ ! -d /mnt/lsc/hd0p1 ];then
+ mkdir /mnt/lsc/hd0p1
+fi
+if [ ! -d /mnt/lsc/hd0p2 ];then
+ mkdir /mnt/lsc/hd0p2
+fi
+sudo mount $home/LSC/dsk/lsc-hd63-flat.img /mnt/lsc/hd0p1 -o loop,offset=32256,sizelimit=22159872,nodev,noexec,rw,users,uid=1000,gid=1000
+sudo mount $home/LSC/dsk/lsc-hd63-flat.img /mnt/lsc/hd0p2 -o loop,offset=22192128,sizelimit=43868160,nodev,noexec,rw,users,uid=1000,gid=1000
 
-sudo chown nuno.nuno /mnt/lsc/hd0p2
+sudo chown $username.$username /mnt/lsc/hd0p2

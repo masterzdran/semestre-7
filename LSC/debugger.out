@@ -1,5 +1,7 @@
 Next at t=0
 (0) [0x00000000fffffff0] f000:fff0 (unk. ctxt): jmp far f000:e05b         ; ea5be000f0
 bx_dbg_read_linear: physical memory read error (phy=0x0000000100000000, lin=0x0000000100000000)
+Next at t=1
+(0) [0x00000000000fe05b] f000:e05b (unk. ctxt): xor ax, ax                ; 31c0
 c
-(0).[8850000000] [0x0000000000007c22] 0000:7c22 (unk. ctxt): jmp .-3 (0x00007c21)      ; ebfd
+(0).[297300000] [0x000000000001061c] 0008:000000000001061c (unk. ctxt): mov rax, rdx              ; 4889d0
