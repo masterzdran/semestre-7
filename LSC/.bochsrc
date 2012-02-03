@@ -6,7 +6,8 @@ memory: guest=32, host=32
 vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
 vga: extension=vbe
 floppya: 1_44=lsc64.fd, status=inserted
-ata0-master: type=disk, mode=flat, cylinders=128, heads=16, spt=63, translation=none, biosdetect=auto, model="LSC Hard Disk", path="/home/masterzdran/WorkingArea/Isel/semestre-7/LSC/dsk/lsc-hd63-flat.img"
+#ata0-master: type=disk, mode=flat, cylinders=128, heads=16, spt=63, translation=none, biosdetect=auto, model="LSC Hard Disk", path="/home/masterzdran/WorkingArea/Isel/semestre-7/LSC/dsk/lsc-hd63-flat.img"
+ata0-master: type=disk, mode=flat, cylinders=128, heads=16, spt=63, translation=none, biosdetect=auto, model="LSC Hard Disk", path="/mnt/hgfs/D/ISEL/Semestre7/LSC/dsk/lsc-hd63-flat.img"
 boot: disk
 floppy_bootsig_check: disabled=0
 log: bochsout.txt

@@ -115,58 +115,58 @@ nuno@ubuntu:/media/DATA/ISEL/Semestre7/LSC/dsk$ sudo hd lsc-hd63-flat.img -s 221
 0152a800
 
 struct minix_super_block {
-     __u16 s_ninodes;				-37d0			- 14288		
-     __u16 s_nzones;				-0				- 0
-     __u16 s_imap_blocks;		-02				- 2
-     __u16 s_zmap_blocks;		-06				- 6
-     __u16 s_firstdatazone;	-0387			- 903
-     __u16 s_log_zone_size;	-0				- 0
-     __u32 s_max_size;			-7fffffff - 2147483647
-     __u16 s_magic;					-2478			- 9336
-     __u16 s_state;					-01				- 1					//marco tem 00
-     __u32 s_zones;					-a758			- 42840	//nº de blocos
+     __u16 s_ninodes;		-37d0		- 14288		
+     __u16 s_nzones;		-0		- 0
+     __u16 s_imap_blocks;	-02		- 2
+     __u16 s_zmap_blocks;	-06		- 6
+     __u16 s_firstdatazone;	-0387		- 903
+     __u16 s_log_zone_size;	-0		- 0
+     __u32 s_max_size;		-7fffffff 	- 2147483647
+     __u16 s_magic;		-2478		- 9336
+     __u16 s_state;		-01		- 1	//marco tem 00
+     __u32 s_zones;		-a758		- 42840	//nº de blocos
 };
 
 Block size = 1024 bytes
 
-s_inodes 				:number of i-nodes 										= 14288 
-s_nzones 				:number of zones	  									= 0 
-s_imap_blocks 	:number of i-node bitmap blocks 			= 2 blocks
-s_zmap_blocks 	:number of zone bitmap blocks 				= 6 blocks
-s_firstdatazone :first data zone 											= 903 zones
-s_log_zone_size :log2 (blocks/zone))									=
-s_max_size 			:maximum file size 										= 2147483647 = 2Gb
-s_magix					:magic number 												= 9336
-s_state 				:(MINIX_VALID_FS or MINIX_ERROR_FS)		=
-s_zones 				:number of zones, if MINIX2						=
+s_inodes 	:number of i-nodes			= 14288 
+s_nzones 	:number of zones			= 0 
+s_imap_blocks 	:number of i-node bitmap blocks 	= 2 blocks
+s_zmap_blocks 	:number of zone bitmap blocks 		= 6 blocks
+s_firstdatazone :first data zone			= 903 zones
+s_log_zone_size :log2 (blocks/zone))			=
+s_max_size 	:maximum file size			= 2147483647 = 2Gb
+s_magix		:magic number				= 9336
+s_state 	:(MINIX_VALID_FS or MINIX_ERROR_FS)	=
+s_zones		:number of zones, if MINIX2		=
 
 Begin of I-Nodes area: 22192128 + 10 blocks = 22202368
 
 struct minix2_inode {
-			__u16 i_mode;				:41ed								: 16877
-      __u16 i_nlinks;			:0002								: 2
-      __u16 i_uid;				:03e8								: 1000
-      __u16 i_gid;				:03e8								: 1000
-      __u32 i_size;				:00000040						: 64		->96
-      __u32 i_atime;			:4e994e10						:
-      __u32 i_mtime;			:4e9042f7						:
-      __u32 i_ctime;			:4e994c4b						:
-      __u32 i_zone[10];		:00000387 (00..00)*9: 903 
+__u16	i_mode;		:41ed		: 16877
+__u16	i_nlinks;	:0002		: 2
+__u16	i_uid;		:03e8		: 1000
+__u16	i_gid;		:03e8		: 1000
+__u32	i_size;		:00000040	: 64		->96
+__u32	i_atime;	:4e994e10	:
+__u32	i_mtime;	:4e9042f7	:
+__u32	i_ctime;	:4e994c4b	:
+__u32	i_zone[10];	:00000387 (00..00)*9: 903 
 };
 
 new file:
 struct minix2_inode {
-			__u16 i_mode;				:81ed								: 33261
-      __u16 i_nlinks;			:0001								: 1
-      __u16 i_uid;				:03e8								: 1000
-      __u16 i_gid;				:03e8								: 1000
-      __u32 i_size;				:0000080b						: 2059
-      __u32 i_atime;			:4e994e10						:
-      __u32 i_mtime;			:4e9042f7						:
-      __u32 i_ctime;			:4e994c4b						:
-      __u32 i_zone[10];		:00000388 					: 904
-													:00000389 					: 905
-													:0000038a 					: 906
+__u16	i_mode;		:81ed		: 33261
+__u16	_nlinks;	:0001		: 1
+__u16	i_uid;		:03e8		: 1000
+__u16	i_gid;		:03e8		: 1000
+__u32	i_size;		:0000080b	: 2059
+__u32	i_atime;	:4e994e10	:
+__u32	i_mtime;	:4e9042f7	:
+__u32	i_ctime;	:4e994c4b	:
+__u32	i_zone[10];	:00000388	: 904
+			:00000389	: 905
+			:0000038a	: 906
 };
 
 root directory entries:
