@@ -1,17 +1,21 @@
-# Disk DescriptorFile 
-version=1 
-CID=fffffffe 
-parentCID=ffffffff 
-createType="monolithicFlat" 
- 
-# Extent description 
-RW 129024 FLAT "lsc-hd63-flat.img" 0 
- 
-# The Disk Data Base 
-#DDB 
- 
-ddb.virtualHWVersion = "3" 
-ddb.geometry.cylinders = "128" 
-ddb.geometry.heads = "16" 
-ddb.geometry.sectors = "63" 
-ddb.adapterType = "ide" 
+# Disk DescriptorFile
+version=1
+CID=fffffffe
+parentCID=ffffffff
+createType="monolithicFlat"
+# Extent description
+RW 129024 FLAT "lsc-hd63-flat.img" 0
+# The Disk Data Base
+#DDB
+ddb.virtualHWVersion = "3"
+ddb.geometry.cylinders = "128"
+ddb.geometry.heads = "16"
+ddb.geometry.sectors = "63"
+ddb.adapterType = "ide"
+ddb.uuid.image="2224d09b-f242-4fd4-84b8-516fc08f9551"
+ddb.uuid.modification="4f2e26a7-498b-4817-b0b8-28c696384e91"
+ddb.uuid.parent="00000000-0000-0000-0000-000000000000"
+ddb.uuid.parentmodification="00000000-0000-0000-0000-000000000000"
+ddb.geometry.biosCylinders="128"
+ddb.geometry.biosHeads="16"
+ddb.geometry.biosSectors="63"
