@@ -17,40 +17,19 @@
 # ISEL  - Instituto Superior de Engenharia de Lisboa
 #=====================================================================
 */
-#include "timer.h"
-#include "VESA.h"
-extern unsigned char bootdrv;
+#ifndef __VESA_H__
+#define __VESA_H__
+#include "Types.h"
+typedef struct
+{
+	unsigned R : 5;
+	unsigned G : 6;
+	unsigned B : 5;
+} __attribute__((packed)) RGBPixel,*pRGBPixel;
 
-#define RED       0x0000FF
-#define GREEN     0x00FF00
-#define BLUE      0xFF0000
-#define ORANGE    0xA5A5A5
-#define BLACK     0x000000
-#define WHITE     0xFFFFFF
-#define BROWN     0x5A5A5A
-#define COLOR_SIZE_ARRAY 4
+#define MAX_LINE 600
+#define MAX_COL 800
 
+void DisplayPixel(U32 color, U32 line, U32 column);
 
-static void show(U32 color){
-      int line,col;
-		for (line = 0;  line < 600; ++line) {
-			for (col = 0; col < 800; ++col) {
-				DisplayPixel(color, line, col);
-         }
-		}
-}
-
-void lsc_main() {
-	Timer_start();
-   unsigned int colors[]= {BLUE, GREEN,BLACK,WHITE};
-
-   char size = 0; 
-	while(1)
-	{
-      for (size = 0  ; size < COLOR_SIZE_ARRAY ; ++size){
-         show(colors[size]);
-         Timer_delay(3000);       
-      }
-	}
-	
-}
+#endif

@@ -17,40 +17,13 @@
 # ISEL  - Instituto Superior de Engenharia de Lisboa
 #=====================================================================
 */
-#include "timer.h"
 #include "VESA.h"
-extern unsigned char bootdrv;
+typedef RGBPixel PCScreen[MAX_LINE][MAX_COL];
+PCScreen * const screen = (PCScreen*)0x800000; 
+#define SCREEN (*screen)
 
-#define RED       0x0000FF
-#define GREEN     0x00FF00
-#define BLUE      0xFF0000
-#define ORANGE    0xA5A5A5
-#define BLACK     0x000000
-#define WHITE     0xFFFFFF
-#define BROWN     0x5A5A5A
-#define COLOR_SIZE_ARRAY 4
-
-
-static void show(U32 color){
-      int line,col;
-		for (line = 0;  line < 600; ++line) {
-			for (col = 0; col < 800; ++col) {
-				DisplayPixel(color, line, col);
-         }
-		}
-}
-
-void lsc_main() {
-	Timer_start();
-   unsigned int colors[]= {BLUE, GREEN,BLACK,WHITE};
-
-   char size = 0; 
-	while(1)
-	{
-      for (size = 0  ; size < COLOR_SIZE_ARRAY ; ++size){
-         show(colors[size]);
-         Timer_delay(3000);       
-      }
-	}
-	
+void DisplayPixel(U32 color, U32 line, U32 column)
+{
+	RGBPixel aux = { (color >>16) & 0xff, ((color >>8) & 0xff)<<1, color & 0xff };
+	SCREEN[line][column] = aux;
 }
