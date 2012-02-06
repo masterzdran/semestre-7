@@ -1,9 +1,25 @@
+/*
+#=======================================================================
+# LSC   - Laboratorio de Sistemas Computacionais
+#-----------------------------------------------------------------------
+# Turma:	LI51N
+# Semestre:	Inverno 2011/2012
+# Data:		Fevereiro/2011
+#-----------------------------------------------------------------------
+# Nome: 	Nuno Cancelo
+# Numero:	31401
+#-----------------------------------------------------------------------
+# Nome:		Nuno Sousa
+# Numero:	33595
+#-----------------------------------------------------------------------
+# LEIC  - Licenciatura em Engenharia Informática e Computadores
+# DEETC - Dep. de Eng. Electrónica e Telecomunicações e Computadores
+# ISEL  - Instituto Superior de Engenharia de Lisboa
+#=====================================================================
+*/
 #include "timer.h"
 #include "io.h"
-
-
 static int lastCount = 0;
-
 static void Timer_reset(unsigned int milis)
 {
 	outb( milis    & LOW_BYTE_MASK,  __SELECT_COUNTER_0__);        

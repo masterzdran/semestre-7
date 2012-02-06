@@ -7,7 +7,6 @@ static U32 ATA_disk_is_ready(U16 bus) //0x1F7
 	inb(bus);
 	inb(bus);
 	inb(bus);
-	
 	while( ( inb(bus) & 0x80 ) == 0x80  ||  ( inb(bus) & 0x29 ) == 0 ); // check if drive is busy or if all of those are clear
 	if((inb(bus)&0x21)!=0) return -1; //return error...
 	return 0; 

@@ -1,5 +1,4 @@
 #include "minix_fs.h"
-
 // Source : http://freebsd.active-venture.com/FreeBSD-srctree/newsrc/libkern/strcmp.c.html
 int strcmp(s1, s2)
 	register const char *s1, *s2;
