@@ -73,12 +73,16 @@ WhileFileSearch:
 	repe cmpsb		
 	cmp $0, %cx		
 	jz FileFound
+	#reset search
 	addw $0x20, %si					#move to next file name
+	subw %cx, %si					#si to point to begin of next file name, not middle
+	movw filename_length, %cx		#using the remaining value of cx and filename length
+	addw %cx, %si
 	jmp WhileFileSearch
 	
 FileFound:
 	subw filename_length, %si		#si to point to begin of file name
-	movb -2(%si), %cl				#cl have inode index (2 in this case)
+	movb -2(%si), %cl				#cl have inode index
 	jmp GetNode
 FileNotFound:
 	jmp stop
@@ -97,7 +101,7 @@ CallRead:
 	movw $0x7E00, %bx				#bx with start address of first node
 		###break 0x7c7e
 WhileTrue:
-	cmp $1,%cl						#is this the correct inode?					
+	cmp $1,%cl						#is this the correct inode index?					
 	je GetInfo
 	addw $64, %bx					#go to next node
 	decb %cl
@@ -183,7 +187,6 @@ EndLoad:
 	jmp FixedAddress
 	
 StartSegment:
-	# %dx == 0, this means i've got to increment the segment that i'm using...
 	movw dap+6,%dx
 	addw $0x1000,%dx
 	movw %dx, dap+6
@@ -198,7 +201,7 @@ stop:
 	jmp stop
 
 .section .rodata         			# program constants (no real protection)
-	filename: 			  .asciz "lsc.sys"
+	filename: 			.asciz "lsc-1.sys"
 	filename_length:	.word 8
 	first_sector: 		.word 0xA950		#first sector...
       
