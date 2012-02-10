@@ -1,0 +1,12 @@
+Next at t=0
+(0) [0x00000000fffffff0] f000:fff0 (unk. ctxt): jmp far f000:e05b         ; ea5be000f0
+bx_dbg_read_linear: physical memory read error (phy=0x0000000100000000, lin=0x0000000100000000)
+b 0x7c00
+c
+(0) Breakpoint 1, 0x0000000000007c00 in ?? ()
+Next at t=153228547
+(0) [0x0000000000007c00] 0000:7c00 (unk. ctxt): jmp far 0000:7c05         ; ea057c0000
+c
+Next at t=8339472651
+(0) [0x0000000000010adc] 0008:0000000000010adc (unk. ctxt): jmp .-3 (0x0000000000010adb) ; ebfd
+(0).[8339472651] [0x0000000000010adc] 0008:0000000000010adc (unk. ctxt): jmp .-3 (0x0000000000010adb) ; ebfd

@@ -1,0 +1,196 @@
+
+nuno@ubuntu:/media/DATA/ISEL/Semestre7/LSC/dsk$ hd -n64 -s446 lsc-hd63-flat.img
+000001be  80 01 01 00 04 0f 3f 2a  3f 00 00 00 11 a9 00 00  |......?*?.......|
+000001ce  00 00 01 2b 06 0f 3f 7f  50 a9 00 00 b0 4e 01 00  |...+..?.P....N..|
+000001de  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+000001fe
+
+*********************************
+
+Disk /dev/loop1: 66 MB, 66060288 bytes
+16 heads, 63 sectors/track, 128 cylinders, total 129024 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk identifier: 0x00000000
+
+      Device Boot      Start         End      Blocks   Id  System
+/dev/loop1p1   *          63       43343       21640+   4  FAT16 <32M
+/dev/loop1p2           43344      129023       42840    6  FAT16
+
+*********************************
+
+Disk /dev/loop1: 66 MB, 66060288 bytes
+16 heads, 63 sectors/track, 128 cylinders
+Units = cylinders of 1008 * 512 = 516096 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk identifier: 0x00000000
+
+      Device Boot      Start         End      Blocks   Id  System
+/dev/loop1p1   *           1          43       21640+   4  FAT16 <32M
+/dev/loop1p2              44         128       42840   81  Minix / old Linux
+
+*********************************
+nuno@ubuntu:/media/DATA/ISEL/Semestre7/LSC/dsk$ hd -n64 -s446 lsc-hd63-flat.img
+000001be  80 01 01 00 04 0f 3f 2a  3f 00 00 00 11 a9 00 00  |......?*?.......|
+000001ce  00 00 01 2b 81 0f 3f 7f  50 a9 00 00 b0 4e 01 00  |...+..?.P....N..|
+000001de  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+000001fe
+*********************************
+nuno@ubuntu:/media/DATA/ISEL/Semestre7/LSC/dsk$ sudo fsck.msdos -v /dev/loop2
+dosfsck 3.0.9 (31 Jan 2010)
+dosfsck 3.0.9, 31 Jan 2010, FAT32, LFN
+Checking we can access the last sector of the filesystem
+Boot sector contents:
+System ID "FreeDOS "
+Media byte 0xf8 (hard disk)
+       512 bytes per logical sector
+      2048 bytes per cluster
+         1 reserved sector
+First FAT starts at byte 512 (sector 1)
+         2 FATs, 16 bit entries
+     22016 bytes per FAT (= 43 sectors)
+Root directory starts at byte 44544 (sector 87)
+       512 root directory entries
+Data area starts at byte 60928 (sector 119)
+     10790 data clusters (22097920 bytes)
+63 sectors/track, 16 heads
+        63 hidden sectors
+     43281 sectors total
+Checking for unused clusters.
+/dev/loop2: 69 files, 593/10790 clusters
+
+************************************
+nuno@ubuntu:/media/DATA/ISEL/Semestre7/LSC/dsk$ sudo mkfs.minix -v /dev/loop3
+14288 inodes
+42840 blocks
+Firstdatazone=903 (903)
+Zonesize=1024
+Maxsize=2147483647
+
+***********************************
+
+nuno@ubuntu:/media/DATA/ISEL/Semestre7/LSC/dsk$ sudo fsck.minix -vfs /dev/loop3
+Forcing filesystem check on /dev/loop3.
+14288 inodes
+42840 blocks
+Firstdatazone=903 (903)
+Zonesize=1024
+Maxsize=2147483647
+Filesystem state=1
+namelen=30
+
+
+     1 inodes used (0%)
+   904 zones used (2%)
+
+     0 regular files
+     1 directories
+     0 character device files
+     0 block device files
+     0 links
+     0 symbolic links
+------
+     1 files
+
+*********************************
+sudo mount lsc-hd63-flat.img /mnt/lsc/hd0p1 -o loop,offset=32256,sizelimit=22159872,nodev,noexec,rw,users,uid=1000,gid=1000
+
+sudo mount lsc-hd63-flat.img /mnt/lsc/hd0p2 -o loop,offset=22192128,sizelimit=43868160,nodev,noexec,rw,users
+*********************************
+nuno@ubuntu:/media/DATA/ISEL/Semestre7/LSC/dsk$ sudo hd lsc-hd63-flat.img -s 22192128 -n 2048
+//BOOT BLOCK
+0152a000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+0152a200  f6 f6 f6 f6 f6 f6 f6 f6  f6 f6 f6 f6 f6 f6 f6 f6  |................|
+*
+//SUPER BLOCK
+0152a400  d0 37 00 00 02 00 06 00  87 03 00 00 ff ff ff 7f  |.7..............|
+0152a410  78 24 01 00 58 a7 00 00  00 00 00 00 00 00 00 00  |x$..X...........|
+0152a420  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+0152a800
+
+struct minix_super_block {
+     __u16 s_ninodes;		-37d0		- 14288		
+     __u16 s_nzones;		-0		- 0
+     __u16 s_imap_blocks;	-02		- 2
+     __u16 s_zmap_blocks;	-06		- 6
+     __u16 s_firstdatazone;	-0387		- 903
+     __u16 s_log_zone_size;	-0		- 0
+     __u32 s_max_size;		-7fffffff 	- 2147483647
+     __u16 s_magic;		-2478		- 9336
+     __u16 s_state;		-01		- 1	//marco tem 00
+     __u32 s_zones;		-a758		- 42840	//nº de blocos
+};
+
+Block size = 1024 bytes
+
+s_inodes 	:number of i-nodes			= 14288 
+s_nzones 	:number of zones			= 0 
+s_imap_blocks 	:number of i-node bitmap blocks 	= 2 blocks
+s_zmap_blocks 	:number of zone bitmap blocks 		= 6 blocks
+s_firstdatazone :first data zone			= 903 zones
+s_log_zone_size :log2 (blocks/zone))			=
+s_max_size 	:maximum file size			= 2147483647 = 2Gb
+s_magix		:magic number				= 9336
+s_state 	:(MINIX_VALID_FS or MINIX_ERROR_FS)	=
+s_zones		:number of zones, if MINIX2		=
+
+Begin of I-Nodes area: 22192128 + 10 blocks = 22202368
+
+struct minix2_inode {
+__u16	i_mode;		:41ed		: 16877
+__u16	i_nlinks;	:0002		: 2
+__u16	i_uid;		:03e8		: 1000
+__u16	i_gid;		:03e8		: 1000
+__u32	i_size;		:00000040	: 64		->96
+__u32	i_atime;	:4e994e10	:
+__u32	i_mtime;	:4e9042f7	:
+__u32	i_ctime;	:4e994c4b	:
+__u32	i_zone[10];	:00000387 (00..00)*9: 903 
+};
+
+new file:
+struct minix2_inode {
+__u16	i_mode;		:81ed		: 33261
+__u16	_nlinks;	:0001		: 1
+__u16	i_uid;		:03e8		: 1000
+__u16	i_gid;		:03e8		: 1000
+__u32	i_size;		:0000080b	: 2059
+__u32	i_atime;	:4e994e10	:
+__u32	i_mtime;	:4e9042f7	:
+__u32	i_ctime;	:4e994c4b	:
+__u32	i_zone[10];	:00000388	: 904
+			:00000389	: 905
+			:0000038a	: 906
+};
+
+root directory entries:
+
+#0 - 01		:	.
+#1 - 01		: ..
+#2 - 02		: include_linux_minix_fs.h
+
+
+nuno@ubuntu:/media/DATA/ISEL/Semestre7/LSC/dsk$ sudo hd lsc-hd63-flat.img -s 23116800 -n 2048
+0160bc00  01 00 2e 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+0160bc10  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+0160bc20  01 00 2e 2e 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+0160bc30  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+0160bc40  02 00 69 6e 63 6c 75 64  65 5f 6c 69 6e 75 78 5f  |..include_linux_|
+0160bc50  6d 69 6e 69 78 5f 66 73  2e 68 00 00 00 00 00 00  |minix_fs.h......|
+0160bc60  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+0160c000  23 69 66 6e 64 65 66 20  5f 4c 49 4e 55 58 5f 4d  |#ifndef _LINUX_M|
+0160c010  49 4e 49 58 5f 46 53 5f  48 0a 23 64 65 66 69 6e  |INIX_FS_H.#defin|
+0160c020  65 20 5f 4c 49 4e 55 58  5f 4d 49 4e 49 58 5f 46  |e _LINUX_MINIX_F|
+0160c030  53 5f 48 0a 0a 23 69 6e  63 6c 75 64 65 20 3c 6c  |S_H..#include <l|
+0160c040  69 6e 75 78 2f 74 79 70  65 73 2e 68 3e 0a 23 69  |inux/types.h>.#i|
+0160c050  6e 63 6c 75 64 65 20 3c  6c 69 6e 75 78 2f 6d 61  |nclude <linux/ma|
+0160c060  67 69 63 2e 68 3e 0a 0a  2f 2a 0a 20 2a 20 54 68  |gic.h>../*. * Th|
+0160c070  65 20 6d 69 6e 69 78 20  66 69 6c 65 73 79 73 74  |e minix filesyst|
+
