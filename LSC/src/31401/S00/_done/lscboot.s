@@ -74,10 +74,11 @@ WhileFileSearch:
 	cmp $0, %cx		
 	jz FileFound
 	#reset search
-	addw $0x20, %si					#move to next file name
-	subw %cx, %si					#si to point to begin of next file name, not middle
+	movw $filename, %di				#name of file to search in %di
+	addw $0x20 , %si					#move to next file name
+	addw %cx, %si					#si to point to begin of next file name, not middle
 	movw filename_length, %cx		#using the remaining value of cx and filename length
-	addw %cx, %si
+	subw %cx, %si
 	jmp WhileFileSearch
 	
 FileFound:
@@ -201,7 +202,7 @@ stop:
 	jmp stop
 
 .section .rodata         			# program constants (no real protection)
-	filename: 			.asciz "lsc-1.sys"
+	filename: 			.asciz "lsc.sys"
 	filename_length:	.word 8
 	first_sector: 		.word 0xA950		#first sector...
       
