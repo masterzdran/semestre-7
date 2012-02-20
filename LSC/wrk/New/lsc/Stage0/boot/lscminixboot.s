@@ -79,7 +79,7 @@ get_nodes:
 	
 	movw $0x7E00, %bx	#bx points to beggin of inodes area
 
-	#cx have index nmber for inode
+	#cx have index number for inode
 get_next_node:
 	cmp $1,%cl
 	je read_node

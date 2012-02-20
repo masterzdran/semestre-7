@@ -1,4 +1,4 @@
-DSK_HOME = /home/masterzdran/WorkingArea/Isel/semestre-7/LSC/dsk
+DSK_HOME = /mnt/hgfs/D/ISEL/Semestre7/LSC/dsk
 
 vbr: lscboot.bin
 	dd if=lscboot.bin of=$(DSK_HOME)/lsc-hd63-flat.img bs=512 seek=43344 count=1 conv=notrunc

@@ -31,14 +31,14 @@ start16:
 
 		movw	%ds, %ax
 		movw	%ax, %es
-		movw  $vesa_info, %di
+		movw  	$vesa_info, %di
 		movw	$0x4F00, %ax
 		int 	$0x10
 
 		movw 	vesa_info+14, %si
 		movw 	vesa_info+16, %ax
 		movw 	%ax,%fs
-		movw  $vesa_mode_info, %di
+		movw  	$vesa_mode_info, %di
 	  
 mode_info_store:
 		cmpw 	$0xFFFF, %fs:(%si)
@@ -59,11 +59,11 @@ res:
 		je	match
 
 no_match:
-		addw  $2, %si
+		addw  $2, %si			#next video mode
 		jmp mode_info_store
 	
 match:
-		## chamar interrupção
+		## chamar interrupção- select video mode
 		movw  %fs:(%si), %bx
 		orw 	$(1<<14), %bx
 		movw	$0x4F02, %ax
@@ -75,10 +75,10 @@ done:
 		xorw   %bx, %bx
 		movw   %bx, %es
 		cld
-		movw   $0xa000, %di ## Clears the DF flag in the EFLAGS register. When the DF flag is set to 0, string operations increment the index registers (ESI and/or EDI).
+		movw   $0xa000, %di
 
 		movw   $0xb00f, %ax
-		stosw ## Stores a byte, word, or doubleword from the AL, AX, or EAX register, respectively, into the destination operand. The destination operand is a memory location, the address of which is read from either the ES:EDI or the ES:DI registers 
+		stosw 
 
 		xorw   %ax, %ax
 		movw   $0x07ff, %cx
@@ -90,10 +90,10 @@ done:
 		xorw   %ax, %ax
 		movw   $0x07ff, %cx
 		rep    stosw
-		## di and si are at the right place -> first entry of PD table
 
 		## [1st to 4th] 2MB page
-		movl $0, %ecx
+		#movl $0, %ecx
+		
 page_directory_cicle:
 		cmpw $4,%cx
 		je end_page_directory_cicle
