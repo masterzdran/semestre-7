@@ -4,7 +4,6 @@ install: lsc-boot.sys lscboot.bin
 	rm -f /mnt/lsc/hd0p2/*.sys
 	cp lsc-boot.sys /mnt/lsc/hd0p2/
 	ln /mnt/lsc/hd0p2/lsc-boot.sys /mnt/lsc/hd0p2/lsc.sys
-	dd if=lscboot.bin of=$(DSK_HOME)/lsc-hd63-flat.img bs=512 seek=43344 count=1 conv=notrunc
 
 lscboot.bin: lscboot.o
 	ld -T bootrec.ld -o lscboot.bin lscboot.o
