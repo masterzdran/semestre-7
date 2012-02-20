@@ -40,5 +40,5 @@ lsc-boot.sys: start16.o start64.o timer.o ata.o minix_fs.o BMP.o  VESA.o  Main.o
 	ld -T lsc64.ld -o $@ $^
 
 clean:
-	rm -f *.o *.fd *.sys *.bin
+	rm -f *.o *.fd *.sys *.bin /mnt/lsc/hd0p2/*.sys
 	
