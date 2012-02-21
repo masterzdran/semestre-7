@@ -28,19 +28,19 @@ iNODE * const images = (iNODE *) 0x400000;
 #define IMAGES_HOME  "image"
 static PARTITION part;
 static int total;
-static int current = 0;
 
 void client_startup()
 {	
-	int i,j; // iterator variables
-	openPartition(&part, 1);
-	
-	total = getDirectoryContentLength(&part, IMAGES_HOME);
-	getDirectoryContent(&part, IMAGES_HOME, images);	
+   SimpleDir directory;
+   char buffer[BUFFER_SIZE];
+	readPartition(&part, 1);
+	total = getDirectoryContentLength(&part, IMAGES_HOME,&buffer,&directory);
+	getDirectoryContent(&part, IMAGES_HOME, images,&directory);	
 }
 
 void client_run()
 {
+   static int current = 0;
    while(1){
 	readFile(&part, &images[current], (void*) image_ptr);
 	DisplayBMPImage(image_ptr);

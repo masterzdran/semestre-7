@@ -9,121 +9,117 @@ int strcmp(s1, s2)
 	return (*(const unsigned char *)s1 - *(const unsigned char *)(s2 - 1));
 }
 
-U32 openPartition(PARTITION * part, unsigned npart)
-{
+/**
+ * Lê a tabela de partições e preenche uma estrutura com os dados da partição activa
+ * */
+U32 readPartition(PARTITION* partition, unsigned partitionNbr){
 	char mbr[512]; 
-	PARTITION_TABLE * partTable = (PARTITION_TABLE*)&mbr[446];
+	PARTITION_TABLE * partitionTable = (PARTITION_TABLE*)&mbr[446];
 	ATA_read(((U16*)mbr), 0, 1);
-	part->pte = partTable[npart];
+   partition->fileDescriptor = partitionNbr;
+	partition->partitionTable = partitionTable[partitionNbr];
 	return 0;
 }
 
-U32 readSectors(PARTITION * part, U32 fsect, U32 nsects, void * dest)
+
+U32 readSectors(PARTITION * partition, U32 firstSector, U32 numberSectors, void * destination)
 {
-	int addr = ( (part->pte.lba_start) + fsect*2 );
-	return ATA_read(dest, addr, nsects);
+	int addr = ( (partition->partitionTable.lba_start) + firstSector*2 );
+	return ATA_read(destination, addr, numberSectors);
 }
 
-int getSuperBlock(PARTITION * part, SUPERBLOCK_TABLE * super_table){
-	return readSectors(part, SUPER_BLOCK, 2, (void *)super_table);
+int getNodes( PARTITION * partition, void * buffer ){	
+	SUPERBLOCK_TABLE superBlockTable;
+   readSectors(partition, SUPER_BLOCK, 2, (void *)(&superBlockTable));
+	int inodes = I_NODES_BITMAP + superBlockTable.s_imap_blocks + superBlockTable.s_zmap_blocks;	
+	return  readSectors(partition, inodes, 2, (void*)buffer);
 }
 
-int getNodes( PARTITION * part, void * buffer ){	
-	SUPERBLOCK_TABLE super_table;
-	getSuperBlock(part, &super_table);
-	int inodes = I_NODES_BITMAP + super_table.s_imap_blocks + super_table.s_zmap_blocks;	
-	return  readSectors(part, inodes, 2, (void*)buffer);
-}
-
-int getDirectoryContentLength(PARTITION * part, char * name){
+static void getDirectory(PARTITION * part, char * name, char* tempBuffer,SimpleDir* directoryDestination){
 	int i;
-	char buffer[BUFFER_SIZE];
-	getNodes(part, (void *)buffer);
-	iNODE * node = (iNODE *)buffer; 
-	readSectors(part, node->i_zone[0], 2, (void*) buffer); 
-	DIR_ENTRY * entries = (DIR_ENTRY *) buffer; 
+	getNodes(part, (void *)tempBuffer);
+	iNODE * node = (iNODE *)tempBuffer; 
+	readSectors(part, node->i_zone[0], 2, (void*) tempBuffer); 
+	DIR_ENTRY * entries = (DIR_ENTRY *) tempBuffer; 
 	for(i = 2; strcmp(entries[i].name, name) != 0 ; i++);				  
 	i = entries[i].inode; 
-	getNodes(part, (void *)buffer); 
-	node = ((iNODE*) buffer);
+	getNodes(part, (void *)tempBuffer); 
+	node = ((iNODE*) tempBuffer);
 	node = &node[i-1];
-	readSectors(part, node->i_zone[0], 2, (void*) buffer);
-	entries = (DIR_ENTRY *) buffer;
-	for(i = 2; entries[i].inode != 0; i++) {}
-	return i-2;
+	readSectors(part, node->i_zone[0], 2, (void*) tempBuffer);
+   directoryDestination->DirectoryEntry = (DIR_ENTRY *) tempBuffer;
 }
 
-int getDirectoryContent(PARTITION * part, char * name, iNODE * result){
+int getDirectoryContentLength(PARTITION * part, char * name,char * buffer, SimpleDir* directory){
 	int i;
-	char buffer[BUFFER_SIZE];
+   getDirectory(part, name, buffer, directory);
 
-	getNodes(part, (void *)buffer);
-	iNODE * node = (iNODE *)buffer; 
-	
-	readSectors(part, node->i_zone[0], 2, (void*) buffer); 
-	DIR_ENTRY * entries = (DIR_ENTRY *) buffer; 
-	for(i = 2; strcmp(entries[i].name, name) != 0 ; i++);				  
-	i = entries[i].inode; 
-   
-	getNodes(part, (void *)buffer); 
-	node = ((iNODE*) buffer);
-	node = &node[i-1];
-	
-	readSectors(part, node->i_zone[0], 2, (void*) buffer);
-	entries = (DIR_ENTRY *) buffer;
-	
+   for(i = 2; directory->DirectoryEntry[i].inode != 0; i++);
+   directory->ContentLength = i-2;
+	return directory->ContentLength;
+}
+
+int getDirectoryContent(PARTITION * part, char * name, iNODE * destination, SimpleDir* directory){
+	int i;
 	char other_buffer[BUFFER_SIZE];
 	getNodes(part, (void *)other_buffer); 
-	
 	iNODE * nodes = (iNODE*) other_buffer;
-	for(i = 2; entries[i].inode != 0 ; i++) {
-		result[(i-2)] = nodes[((entries[i].inode) - 1)];
+	for(i = 2; directory->DirectoryEntry[i].inode != 0 ; i++) {
+		destination[(i-2)] = nodes[((directory->DirectoryEntry[i].inode) - 1)];
 	}
 	
-	return i-2;	
+   directory->ContentLength = i-2;
+	return directory->ContentLength;
 }
 
-void storeDataZonesDirect(int * storage, iNODE * node){
+
+
+
+
+
+
+
+static void storeDataZonesDirect(int * storage, iNODE * node){
 	int i, stIdx = 0;
 	for(i = 0; i<7; i++, stIdx++){
 		storage[stIdx] = node->i_zone[i];
 	}	
 }
 
-void storeDataZones1Indirect(int * storage, iNODE * node, PARTITION * part){
+static void storeDataZones1Indirect(int * storage, iNODE * node, PARTITION * partition){
 	int idx = 7, i=0;
 	char buffer[BUFFER_SIZE];
 	
-	readSectors(part, node->i_zone[7], 2, (void*) buffer);
+	readSectors(partition, node->i_zone[7], 2, (void*) buffer);
 	for(; i<256; i++, idx++){
 		storage[idx] = ((int *) &buffer)[i];
 	}
 }
 
-void storeDataZones2Indirect(int * storage, iNODE * node, PARTITION * part){
+static void storeDataZones2Indirect(int * storage, iNODE * node, PARTITION * partition){
 	int idx = 263, i=0, j=0, n_zones=(node->i_size/1024)+1;
 	char buffer[BUFFER_SIZE];
 	char buffer0[BUFFER_SIZE];
-	readSectors(part, node->i_zone[8], 2, (void*) buffer);
+	readSectors(partition, node->i_zone[8], 2, (void*) buffer);
 	int * pointers = (int *) &buffer;	
 	for(i = 0; i < 256; i++){
-		readSectors(part, pointers[i], 2, (void*) buffer0);
+		readSectors(partition, pointers[i], 2, (void*) buffer0);
 		int * pointers0 = (int *) &buffer0;
 		for(j = 0; j < 256 && idx<n_zones; j++, idx++) storage[idx] = pointers0[j]; 
 	}	
 }
 
-void readFile(PARTITION * part, iNODE * file_node, void * destination){	
+void readFile(PARTITION * partition, iNODE * file_node, void * destination){	
 	int n_zones = file_node->i_size/1024+1;
 	int data_zones[n_zones];
 	storeDataZonesDirect(data_zones, file_node); 
-	storeDataZones1Indirect(data_zones, file_node, part);
-	storeDataZones2Indirect(data_zones, file_node, part); 
+	storeDataZones1Indirect(data_zones, file_node, partition);
+	storeDataZones2Indirect(data_zones, file_node, partition); 
 	char * file_data = (char *)destination;
 	int i;
 	for( i=0 ; i<n_zones ; ++i )
 	{
-		readSectors(part, data_zones[i], SECTORS, (void*)file_data);
+		readSectors(partition, data_zones[i], SECTORS, (void*)file_data);
 		file_data += SECTORS*512;
 	}
 }
