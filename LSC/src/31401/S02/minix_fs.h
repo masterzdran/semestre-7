@@ -22,7 +22,7 @@ typedef struct partition_table
 	int lba_count;
 } PARTITION_TABLE;
 //Source : http://www.cs.fsu.edu/~baker/devices/lxr/http/source/linux/include/linux/minix_fs.h
-typedef struct superblock_table { 
+typedef struct minix_super_block { 
 	short int s_ninodes;
 	short int s_nzones;
 	short int s_imap_blocks;
@@ -36,7 +36,7 @@ typedef struct superblock_table {
 	char reserved[1000];
 } SUPERBLOCK_TABLE;
 
-typedef struct inode_struct { 
+typedef struct minix2_inode { 
 	short int i_mode;
 	short int i_nlinks;
 	short int i_uid;
@@ -53,12 +53,20 @@ typedef struct minix_dir_entry {
 	char name[30];
 } DIR_ENTRY;
 
+
 typedef struct part {
-	int fd;
-	PARTITION_TABLE pte;
+	int fileDescriptor;
+	PARTITION_TABLE partitionTable;
 } PARTITION;
 
-U32 openPartition(PARTITION * part, unsigned npart);
-U32 readSectors(PARTITION * part, U32 fsect, U32 nsects, void * dest);
+typedef struct{
+   U32 ContentLength;
+   DIR_ENTRY* DirectoryEntry; 
+}SimpleDir;
+
+U32 readPartition(PARTITION* partition, unsigned partitionNbr);
+int getDirectoryContentLength(PARTITION * part, char * name,char * buffer, SimpleDir* directory);
+int getDirectoryContent(PARTITION * part, char * name, iNODE * destination, SimpleDir* directory);
+void readFile(PARTITION * partition, iNODE * file_node, void * destination);
 
 #endif

@@ -2,10 +2,4 @@ Next at t=0
 (0) [0x00000000fffffff0] f000:fff0 (unk. ctxt): jmp far f000:e05b         ; ea5be000f0
 bx_dbg_read_linear: physical memory read error (phy=0x0000000100000000, lin=0x0000000100000000)
 c
-<<<<<<< HEAD
-Next at t=232800000
-(0) [0x0000000000010721] 0008:0000000000010721 (unk. ctxt): mov eax, dword ptr ss:[rbp-12] ; 8b45f4
-(0).[232800000] [0x0000000000010721] 0008:0000000000010721 (unk. ctxt): mov eax, dword ptr ss:[rbp-12] ; 8b45f4
-=======
-(0).[648100000] [0x000000000001074a] 0008:000000000001074a (unk. ctxt): mov word ptr ss:[rbp-20], ax ; 668945ec
->>>>>>> b12c3e1351918cf574b1f7f3b9d97dc6ae89c3dd
+(0).[358300000] [0x00000000000108ec] 0008:00000000000108ec (unk. ctxt): mov dword ptr ss:[rbp-16], eax ; 8945f0

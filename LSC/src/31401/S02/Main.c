@@ -24,34 +24,33 @@
 
 char * const image_ptr = (char*) 0x600000;
 iNODE * const images = (iNODE *) 0x400000;
-//static iNODE * images;
 #define IMAGES_HOME  "image"
 static PARTITION part;
 static int total;
-static int current = 0;
 
-void client_startup()
+void lsc_startup()
 {	
-	int i,j; // iterator variables
-	openPartition(&part, 1);
-	
-	total = getDirectoryContentLength(&part, IMAGES_HOME);
-	getDirectoryContent(&part, IMAGES_HOME, images);	
+   SimpleDir directory;
+   char buffer[BUFFER_SIZE];
+	readPartition(&part, 1);
+	total = getDirectoryContentLength(&part, IMAGES_HOME,&buffer,&directory);
+	getDirectoryContent(&part, IMAGES_HOME, images,&directory);	
 }
 
-void client_run()
+void lsc_run()
 {
-   while(1){
-	readFile(&part, &images[current], (void*) image_ptr);
-	DisplayBMPImage(image_ptr);
-	if(++current >= total) current = 0;
-	
-	Timer_delay(5000);
+   int idx = 0;
+   //while(1){
+   for(idx = 0 ; idx + 1 ;idx = (idx + 1) % total){
+      readFile(&part, &images[idx], (void*) image_ptr);
+      DisplayBMPImage(image_ptr);
+      Timer_delay(5000);
+      //current = (current + 1) % total;
    }
 }
 
 void lsc_main() {
-	client_startup();
-	client_run();
+	lsc_startup();
+	lsc_run();
 }
 

@@ -4,7 +4,6 @@ install: lsc-boot.sys lscboot.bin
 	rm -f /mnt/lsc/hd0p2/*.sys
 	cp lsc-boot.sys /mnt/lsc/hd0p2/
 	ln /mnt/lsc/hd0p2/lsc-boot.sys /mnt/lsc/hd0p2/lsc.sys
-	dd if=lscboot.bin of=$(DSK_HOME)/lsc-hd63-flat.img bs=512 seek=43344 count=1 conv=notrunc
 
 lscboot.bin: lscboot.o
 	ld -T bootrec.ld -o lscboot.bin lscboot.o
@@ -20,14 +19,13 @@ start64.o: start64.s
 	as --64 -o $@ $^
 	
 Main.o: Main.c
-	gcc -m64 -ffreestanding -mno-red-zone -c -o $@ $^ 
+	gcc -m64  -fno-stack-protector -ffreestanding -mno-red-zone -c -o $@ $^ 
 
 timer.o: timer.c
 	gcc -m64 -ffreestanding -mno-red-zone -c -o $@ $^ 
 
 ata.o: ata.c
-	gcc -m64 -ffreestanding -mno-red-zone -c -o $@ $^ 
-
+	gcc -m64 -ffreestanding -mno-red-zone -c -o $@ $^  
 BMP.o: BMP.c
 	gcc -m64 -ffreestanding -mno-red-zone -c -o $@ $^ 
 
@@ -41,5 +39,5 @@ lsc-boot.sys: start16.o start64.o timer.o ata.o minix_fs.o BMP.o  VESA.o  Main.o
 	ld -T lsc64.ld -o $@ $^
 
 clean:
-	rm -f *.o *.fd *.sys *.bin
+	rm -f *.o *.fd *.sys *.bin /mnt/lsc/hd0p2/*.sys
 	

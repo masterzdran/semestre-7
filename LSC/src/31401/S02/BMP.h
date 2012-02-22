@@ -21,13 +21,14 @@
 #define __BMP_H__
 
 #include "Types.h"
+//Source :  http://paulbourke.net/dataformats/bmp/BITMAP.H
 
 typedef struct{
     U8	signature[2];
     U32	fileSize;
     U32	reserved;
     U32	offset;
-} __attribute__((packed)) BMP_HEADER;
+} __attribute__((packed)) BITMAPFILEHEADER;
 
 typedef struct{
     U32 headerSize;
@@ -41,19 +42,19 @@ typedef struct{
     U32 verticalResolution;
     U32 numColors;
  U32 importantColors;
-} BMP_IMAGE_INFO;
+} BITMAPINFOHEADER;
 
 typedef struct{
     U8 blue;
     U8 green;
     U8 red;
-} __attribute__((packed)) BMP_RGB;
+} __attribute__((packed)) RGB;
 
 typedef struct {
-	BMP_HEADER header;
-	BMP_IMAGE_INFO info;
-	BMP_RGB colors[1];
-} __attribute__((packed)) BMP_24BPP_FILE; 
+	BITMAPFILEHEADER header;
+	BITMAPINFOHEADER info;
+	RGB color[1];
+} __attribute__((packed)) BITMAPINFO; 
 
 int DisplayBMPImage(void * image_ptr);
 
