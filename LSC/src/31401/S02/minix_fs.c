@@ -74,52 +74,43 @@ int getDirectoryContent(PARTITION * part, char * name, iNODE * destination, Simp
 
 
 
-
-
-
-
-
-static void storeDataZonesDirect(int * storage, iNODE * node){
-	int i, stIdx = 0;
-	for(i = 0; i<7; i++, stIdx++){
-		storage[stIdx] = node->i_zone[i];
+static void storeDataZone(int * storage, int storageSize,iNODE * node, PARTITION * partition)
+{
+   U32 writeByteIdx = 0, idx = 0;
+   
+   //Direct Blocks
+	for(idx = 0; idx<7; idx++, writeByteIdx++){
+		storage[writeByteIdx] = node->i_zone[idx];
 	}	
-}
-
-static void storeDataZones1Indirect(int * storage, iNODE * node, PARTITION * partition){
-	int idx = 7, i=0;
+   //Indirect Blocks
+   idx=0;
 	char buffer[BUFFER_SIZE];
-	
 	readSectors(partition, node->i_zone[7], 2, (void*) buffer);
-	for(; i<256; i++, idx++){
-		storage[idx] = ((int *) &buffer)[i];
+	for(; idx<256; idx++, writeByteIdx++){
+		storage[writeByteIdx] = ((int *) &buffer)[idx];
 	}
-}
-
-static void storeDataZones2Indirect(int * storage, iNODE * node, PARTITION * partition){
-	int idx = 263, i=0, j=0, n_zones=(node->i_size/1024)+1;
-	char buffer[BUFFER_SIZE];
-	char buffer0[BUFFER_SIZE];
+   
+   //Double Indirect Blocks
+   idx=0;int  index=0;
+	char anotherBuffer[BUFFER_SIZE];
 	readSectors(partition, node->i_zone[8], 2, (void*) buffer);
-	int * pointers = (int *) &buffer;	
-	for(i = 0; i < 256; i++){
-		readSectors(partition, pointers[i], 2, (void*) buffer0);
-		int * pointers0 = (int *) &buffer0;
-		for(j = 0; j < 256 && idx<n_zones; j++, idx++) storage[idx] = pointers0[j]; 
-	}	
+	int * pointer = (int *) &buffer;	
+	for(idx = 0; idx < 256; idx++){
+		readSectors(partition, pointer[idx], 2, (void*) anotherBuffer);
+		int * anotherPointer = (int *) &anotherBuffer;
+		for(index = 0; index < 256 && writeByteIdx<storageSize; index++, writeByteIdx++) storage[writeByteIdx] = anotherPointer[index]; 
+	}	   
+
 }
 
 void readFile(PARTITION * partition, iNODE * file_node, void * destination){	
 	int n_zones = file_node->i_size/1024+1;
 	int data_zones[n_zones];
-	storeDataZonesDirect(data_zones, file_node); 
-	storeDataZones1Indirect(data_zones, file_node, partition);
-	storeDataZones2Indirect(data_zones, file_node, partition); 
-	char * file_data = (char *)destination;
+   storeDataZone(data_zones,n_zones, file_node, partition);
 	int i;
 	for( i=0 ; i<n_zones ; ++i )
 	{
-		readSectors(partition, data_zones[i], SECTORS, (void*)file_data);
-		file_data += SECTORS*512;
+		readSectors(partition, data_zones[i], SECTORS, destination);
+		destination += SECTORS*512;
 	}
 }

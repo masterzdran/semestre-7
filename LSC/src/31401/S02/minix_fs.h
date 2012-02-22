@@ -63,15 +63,9 @@ typedef struct{
    U32 ContentLength;
    DIR_ENTRY* DirectoryEntry; 
 }SimpleDir;
-/*
-U32 readPartition(PARTITION* partition, unsigned partitionNbr);
-void getDirectoryContentLength(PARTITION * part, char * name, SimpleDir* directoryDestination);
-void getDirectoryContent(PARTITION * part, char * name, iNODE * destination, SimpleDir* directoryDestination);
-void readFile(PARTITION * partition, iNODE * file_node, void * destination);
-*/
 
 U32 readPartition(PARTITION* partition, unsigned partitionNbr);
-int getDirectoryContentLength(PARTITION * part, char * name,char * buffer, SimpleDir* directory)
+int getDirectoryContentLength(PARTITION * part, char * name,char * buffer, SimpleDir* directory);
 int getDirectoryContent(PARTITION * part, char * name, iNODE * destination, SimpleDir* directory);
 void readFile(PARTITION * partition, iNODE * file_node, void * destination);
 
