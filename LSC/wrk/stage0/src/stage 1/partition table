@@ -107,8 +107,8 @@ Size Bytes / Block = Byte/Block
 
 
 ------------------------------------------------------------------------
-The boot block takes exactly one block and contains the volume boot record. The superblock
-takes another block and contains information (see Table 4) about the layout of the file system.
+The boot block takes exactly one block and contains the volume boot record. 
+The superblock takes another block and contains information (see Table 4) about the layout of the file system.
 
 
 Each i-node in the I-nodes area occupies 64 bytes and is used to hold metadata (see Table 5)
@@ -121,8 +121,8 @@ blocks are grouped into zones, with each zone representing 2n blocks, for some n
 
 
 The I-nodes bitmap area has one bit per existing i-node and is used to find free i-nodes in the
-I-nodes area. Similarly, the Zone bitmap has one bit for each zone in the Data area and is used
-to find free zones in it.
+I-nodes area. 
+Similarly, the Zone bitmap has one bit for each zone in the Data area and is used to find free zones in it.
 
 
 
@@ -240,8 +240,8 @@ Partition Start/Boot Block: 22192128
 SuperBlock				  : 22192128 + 1024
 Inodes Bitmap			  : 22192128 + 1024 + 1024
 Zone Bitmap				  : 22192128 + 1024 + 1024 + 2 * 1024
-Inodes					  : 22192128 + 1024 + 1024 + 2 * 1024 + 6*1024 
-Data					  :
+Inodes					    : 22192128 + 1024 + 1024 + 2 * 1024 + 6*1024 
+Data					      :
 
 
 
@@ -270,16 +270,16 @@ masterzdran@TahuwaHuwai:~/WorkingArea/Isel/LSC/dsk$ sudo hexdump lsc-hd63-flat.i
 *
 152a800
 
-s_ninodes 		: 37d0 			= 14288
-s_nzones 		: 0000			= 0 
+s_ninodes 		  : 37d0 			= 14288
+s_nzones 		    : 0000			= 0 
 s_imap_blocks 	: 0002			= 2
 s_zmap_blocks 	: 0006			= 6
 s_firstdatazone : 0387			= 903
 s_log_zone_size : 00 00			= 0
-s_max_size 		: 7fff ffff		= 2147483647
-s_magic 		: 2478			= 2478
-s_state 		: 00 00			= 0 
-s_zones 		: 0000 a758		= 42840
+s_max_size 		  : 7fff ffff		= 2147483647
+s_magic 		    : 2478			= 2478
+s_state 		    : 00 00			= 0 
+s_zones 		    : 0000 a758		= 42840
 
 Table 5 – Root directory i-node (incomplete)
 	struct minix2_inode {
@@ -301,15 +301,15 @@ masterzdran@TahuwaHuwai:~/WorkingArea/Isel/LSC/dsk$ sudo hexdump lsc-hd63-flat.i
 *
 152cc00
 
-i_mode 			: 41ed			= 16877
-i_nlinks 		: 0002			= 2
-i_uid 			: 03e8			= 1000
-i_gid 			: 03e8			= 1000
-i_size 			: 0000 0040	    = 64
-i_atime 		: 4e99 4f14 	= 1318670100
-i_mtime 		: 4e99 4f14	    = 1318670100
-i_ctime 		: 4e99 4f14	    = 1318670100
-i_zone[0] 		: 0000 0387	    = 903 -> 903*1024 = E1C00 = 924672 -> 23116800
+i_mode 			  : 41ed			  = 16877
+i_nlinks 		  : 0002			  = 2
+i_uid 			  : 03e8			  = 1000
+i_gid 			  : 03e8			  = 1000
+i_size 			  : 0000 0040	  = 64
+i_atime 		  : 4e99 4f14 	= 1318670100
+i_mtime 		  : 4e99 4f14	  = 1318670100
+i_ctime 		  : 4e99 4f14	  = 1318670100
+i_zone[0] 		: 0000 0387	  = 903 -> 903*1024 = E1C00 = 924672 -> 23116800
 i_zone[1] 		: 0000 0000 	= 0
 
 Table 6 – Root directory entries

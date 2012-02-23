@@ -19,14 +19,13 @@ start64.o: start64.s
 	as --64 -o $@ $^
 	
 Main.o: Main.c
-	gcc -m64 -ffreestanding -mno-red-zone -c -o $@ $^ 
+	gcc -m64  -fno-stack-protector -ffreestanding -mno-red-zone -c -o $@ $^ 
 
 timer.o: timer.c
 	gcc -m64 -ffreestanding -mno-red-zone -c -o $@ $^ 
 
 ata.o: ata.c
-	gcc -m64 -ffreestanding -mno-red-zone -c -o $@ $^ 
-
+	gcc -m64 -ffreestanding -mno-red-zone -c -o $@ $^  
 BMP.o: BMP.c
 	gcc -m64 -ffreestanding -mno-red-zone -c -o $@ $^ 
 
