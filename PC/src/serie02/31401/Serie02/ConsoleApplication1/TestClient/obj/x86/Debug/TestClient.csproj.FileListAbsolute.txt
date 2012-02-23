@@ -1,0 +1,5 @@
+C:\WorkingArea\Programação Concurrente\Serie02\ConsoleApplication1\TestClient\bin\Debug\TestClient.exe
+C:\WorkingArea\Programação Concurrente\Serie02\ConsoleApplication1\TestClient\bin\Debug\TestClient.pdb
+C:\WorkingArea\Programação Concurrente\Serie02\ConsoleApplication1\TestClient\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\WorkingArea\Programação Concurrente\Serie02\ConsoleApplication1\TestClient\obj\x86\Debug\TestClient.exe
+C:\WorkingArea\Programação Concurrente\Serie02\ConsoleApplication1\TestClient\obj\x86\Debug\TestClient.pdb
