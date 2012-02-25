@@ -1,7 +1,7 @@
 ﻿using System.Net.Sockets;
 using System.Net;
 using System;
-namespace Tracker
+namespace Server
 {
     public sealed class Listener
     {
@@ -20,11 +20,9 @@ namespace Tracker
                 while (true)
                 {
                     log.LogMessage("Listener - Waiting for connection requests.");
-
                     TcpClient socket = srv.AcceptTcpClient();
                     socket.LingerState = new LingerOption(true, 10);
                     log.LogMessage(String.Format("Listener - Connection established with {0}.", socket.Client.RemoteEndPoint));
-
                     Handler.StartAcceptTcpClient(socket, log);
                 }
             }

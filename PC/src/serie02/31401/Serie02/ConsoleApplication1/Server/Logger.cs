@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Collections.Generic;
 
-namespace Tracker
+namespace Server
 {
     enum LoggerStatus { Started, Stoped }
     public class Logger
@@ -14,8 +14,8 @@ namespace Tracker
         DateTime start_time;
         int num_requests;
         volatile LoggerStatus status;
-        volatile Thread workerThread;
-        readonly LinkedList<string> messageQueue;
+        volatile Thread thWorker;
+        readonly LinkedList<string> queue;
         public Logger() : this(Console.Out) { }
         public Logger(string logfile) : this(new StreamWriter(new FileStream(logfile, FileMode.Append, FileAccess.Write))) { }
         public Logger(TextWriter awriter)
@@ -23,7 +23,7 @@ namespace Tracker
             num_requests = 0;
             writer = awriter;
             status = LoggerStatus.Stoped;
-            messageQueue = new LinkedList<string>();
+            queue = new LinkedList<string>();
         }
 
         void WriterWork()
@@ -31,49 +31,44 @@ namespace Tracker
             while (true)
             {
                 string queueEntry = null;
-                lock (messageQueue)
+                lock (queue)
                 {
-                    if (messageQueue.Count > 0)
+                    if (queue.Count > 0)
                     {
-                        queueEntry = messageQueue.First.Value;
-                        messageQueue.RemoveFirst();
+                        queueEntry = queue.First.Value;
+                        queue.RemoveFirst();
                     }
                     else
                     {
                         try
                         {
-                            Monitor.Wait(messageQueue);
+                            Monitor.Wait(queue);
                         }
-                        catch (ThreadInterruptedException)
-                        {
-                        }
+                        catch (ThreadInterruptedException){}
                     }
                 }
-
                 if (queueEntry != null) writer.Write(queueEntry);
             }
         }
 
         void Enqueue(string text)
         {
-            lock (messageQueue)
+            lock (queue)
             {
-                if (messageQueue.Count < SIZE)
+                if (queue.Count < SIZE)
                 {
-                    messageQueue.AddLast(text);
-                    Monitor.PulseAll(messageQueue);
+                    queue.AddLast(text);
+                    Monitor.PulseAll(queue);
                     return;
                 }
 
                 while (true)
                 {
-                    //TODO: Implementar o cancelamento e desistência
-                    Monitor.Wait(messageQueue);
-
-                    if (messageQueue.Count < SIZE)
+                    Monitor.Wait(queue);
+                    if (queue.Count < SIZE)
                     {
-                        messageQueue.AddLast(text);
-                        Monitor.PulseAll(messageQueue);
+                        queue.AddLast(text);
+                        Monitor.PulseAll(queue);
                         return;
                     }
                 }
@@ -101,9 +96,9 @@ namespace Tracker
                 status = LoggerStatus.Started;
             }
 
-            workerThread = new Thread(new ThreadStart(WriterWork));
-            workerThread.Priority = ThreadPriority.Lowest;
-            workerThread.Start();
+            thWorker = new Thread(new ThreadStart(WriterWork));
+            thWorker.Priority = ThreadPriority.Lowest;
+            thWorker.Start();
 
             WriteLine();
             WriteLine(String.Format("::- LOG STARTED @ {0} -::", start_time));
@@ -130,12 +125,10 @@ namespace Tracker
             LogMessage(String.Format("Number of request(s): {0}", num_requests));
             WriteLine();
             LogMessage(String.Format("::- LOG STOPPED @ {0} -::", DateTime.Now));
-
-
             lock (this)
             {
                 if (status == LoggerStatus.Stoped) return false;
-                workerThread.Interrupt();
+                thWorker.Interrupt();
                 status = LoggerStatus.Stoped;
             }
 

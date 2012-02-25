@@ -1,112 +1,17 @@
 ﻿using System.Collections.Generic;
 using System;
 using System.Net;
-using Tracker;
+using Server;
 using System.Text;
 using System.IO;
 using System.Net.Sockets;
-namespace Tracker
+namespace Server
 {
     public sealed class Handler
     {
-        internal sealed class Timeouter
-        {
-            class TimeoutElement
-            {
-                public int _endTime;
-                public IAsyncResult _entry;
-                public TimeoutElement() { _endTime = Environment.TickCount + TIMEOUT; }
-            }
-
-            private LinkedList<TimeoutElement> reqQueue;
-            private const int TIMEOUT = 7000;
-            private System.Timers.Timer worker;
-
-            public static Timeouter Current;
-
-            static Timeouter()
-            {
-                Current = new Timeouter();
-            }
-
-            private Timeouter()
-            {
-                reqQueue = new LinkedList<TimeoutElement>();
-                worker = new System.Timers.Timer(TIMEOUT);
-                worker.Elapsed += DoWork;
-                worker.Enabled = true;
-            }
-
-            private void DoWork(object sender, EventArgs e)
-            {
-                try
-                {
-                    worker.Stop();
-                    lock (reqQueue)
-                    {
-
-                        while (reqQueue.Count > 0)
-                        {
-                            if (reqQueue.First.Value._entry.IsCompleted)
-                            {
-                                reqQueue.RemoveFirst();
-                            }
-                            else if (reqQueue.First.Value._endTime < Environment.TickCount)
-                            {
-                                ((StateObject)reqQueue.First.Value._entry.AsyncState).Socket.Close();
-                                reqQueue.RemoveFirst();
-                            }
-                            else
-                                break;
-                        }
-                    }
-                }
-                finally { worker.Start(); }
-            }
-
-            public void AddItem(IAsyncResult entry)
-            {
-                lock (reqQueue)
-                {
-                    reqQueue.AddLast(new TimeoutElement { _entry = entry });
-                }
-            }
-        }
-        internal sealed class StateObject
-        {
-            public const int BufferSize = 256;
-
-            volatile StringReader input;
-
-            public readonly TcpClient Socket;
-            public readonly byte[] Buffer;
-            public readonly StringBuilder Content;
-            public readonly Logger Log;
-
-            public StateObject(TcpClient cSocket, Logger log)
-            {
-                Socket = cSocket;
-                Log = log;
-                Buffer = new byte[BufferSize];
-                Content = new StringBuilder();
-            }
-
-            public NetworkStream Stream { get { return Socket.GetStream(); } }
-
-            public string ReadLine()
-            {
-                lock (this)
-                {
-                    if (input == null) input = new StringReader(Content.ToString());
-
-                    return input.ReadLine();
-                }
-            }
-        }
         #region Message handlers
 
         static readonly Dictionary<string, Action<StateObject>> MESSAGE_HANDLERS;
-
         static Handler()
         {
             MESSAGE_HANDLERS = new Dictionary<string, Action<StateObject>>();
@@ -115,7 +20,9 @@ namespace Tracker
             MESSAGE_HANDLERS["LIST_FILES"] = ProcessListFilesMessage;
             MESSAGE_HANDLERS["LIST_LOCATIONS"] = ProcessListLocationsMessage;
         }
-
+        /**
+         * Handles REGISTER messages
+         * */
         static void ProcessRegisterMessage(StateObject state)
         {
             string line;
@@ -143,7 +50,9 @@ namespace Tracker
             }
             Handler.CloseConnection(state);
         }
-
+        /**
+         * Handles REGISTER messages
+         * */
         static void ProcessUnregisterMessage(StateObject state)
         {
             string line;
@@ -176,6 +85,9 @@ namespace Tracker
             Handler.CloseConnection(state);
         }
 
+        /**
+         * Handles LIST_FILES messages
+         * */
         private static void ProcessListFilesMessage(StateObject state)
         {
             string[] trackedFiles = Store.Instance.GetTrackedFiles();
@@ -188,13 +100,16 @@ namespace Tracker
             state.Stream.BeginWrite(response, 0, response.Length,
                 ProcessListFilesEnd, state);
         }
+        
         private static void ProcessListFilesEnd(IAsyncResult iaR)
         {
             StateObject state = (StateObject)iaR.AsyncState;
             state.Stream.EndWrite(iaR);
             Handler.CloseConnection(state);
         }
-
+        /**
+         *  Handles LIST_LOCATIONS messages.
+         * */
         private static void ProcessListLocationsMessage(StateObject state)
         {
             string line;
@@ -218,6 +133,7 @@ namespace Tracker
             else
             { state.Log.LogMessage("Handler - Invalid LIST_LOCATIONS message."); }
         }
+        
         private static void ProcessListLocationsEnd(IAsyncResult iaR)
         {
             StateObject state = (StateObject)iaR.AsyncState;
@@ -226,6 +142,7 @@ namespace Tracker
         }
 
         #endregion
+
         static void ReadDataCallback(IAsyncResult ar)
         {
             StateObject state = (StateObject)ar.AsyncState;
@@ -236,7 +153,6 @@ namespace Tracker
                 if (bytesRead > 0)
                 {
                     state.Content.Append(Encoding.ASCII.GetString(state.Buffer, 0, bytesRead));
-
                     // Tests if one blank line was sent meaning client submited request
                     if (state.Content.ToString().Contains("\r\n\r\n"))
                     {
@@ -276,18 +192,15 @@ namespace Tracker
             Program.ShowInfo(Store.Instance);
         }
 
-        /// <summary>
-        /// Performs request servicing.
-        /// </summary>
+        /**
+        * Performs request servicing.
+        * */
         public static void StartAcceptTcpClient(TcpClient socket, Logger log)
         {
             try
             {
                 StateObject state = new StateObject(socket, log);
-
-                IAsyncResult iaR = state.Stream.BeginRead(state.Buffer, 0, StateObject.BufferSize,
-                    new AsyncCallback(ReadDataCallback), state);
-
+                IAsyncResult iaR = state.Stream.BeginRead(state.Buffer, 0, StateObject.BufferSize, new AsyncCallback(ReadDataCallback), state);
                 Timeouter.Current.AddItem(iaR);
             }
             catch (IOException ioe) { log.LogMessage(String.Format("Handler - Connection closed by client.\n{0}", ioe)); }

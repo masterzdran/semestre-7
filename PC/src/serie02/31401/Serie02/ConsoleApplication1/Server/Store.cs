@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
-namespace Tracker
+namespace Server
 {
     public sealed class Store
     {
