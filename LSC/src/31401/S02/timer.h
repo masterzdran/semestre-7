@@ -43,7 +43,7 @@
 
 #define LOW_BYTE_MASK      (0xFF)
 #define ACTION             (0x34)
-#define RESET_VALUE        (0x9E0)
+#define RESET_VALUE        (0x2E90)
 void Timer_start();
 void Timer_delay(long milis);
 #endif

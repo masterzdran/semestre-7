@@ -19,11 +19,13 @@
 */
 #include "timer.h"
 #include "io.h"
+#define BYTE 8
+
 static int lastCount = 0;
 static void Timer_reset(unsigned int milis)
 {
-	outb( milis    & LOW_BYTE_MASK,  __SELECT_COUNTER_0__);        
-	outb((milis>>8)& LOW_BYTE_MASK,  __SELECT_COUNTER_0__);   
+	outb( milis        & LOW_BYTE_MASK,  __SELECT_COUNTER_0__);        
+	outb((milis>> BYTE)& LOW_BYTE_MASK,  __SELECT_COUNTER_0__);   
 }
 
 void Timer_start()
@@ -35,8 +37,8 @@ void Timer_start()
 static unsigned int Timer_read()
 {
 	outb(0,__CONTROL__);                   
-	int data = inb(__SELECT_COUNTER_0__); 
-	data += inb(__SELECT_COUNTER_0__)<<4;
+	int data  = inb(__SELECT_COUNTER_0__); 
+	    data += inb(__SELECT_COUNTER_0__)<< BYTE;
 	return data;
 }
 
@@ -50,10 +52,8 @@ static unsigned int Timer_cycles()
 
 void Timer_delay(long milis)
 {
-	if(milis<=10) return;
-	long total_cycles = (milis+5) / 10; 
-	while(total_cycles>0)
+	while(milis>0)
 	{
-		if(Timer_cycles()>0)total_cycles -=1 ;
+		if(Timer_cycles()>0)milis -=10 ;
 	}
 }
