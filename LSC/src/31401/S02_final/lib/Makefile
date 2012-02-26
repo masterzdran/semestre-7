@@ -31,7 +31,6 @@ include $(PROJECT_PATH)/common.mk
 install: lsc-boot.sys lscboot.bin
 	$(RM) -f /mnt/lsc/hd0p2/*.sys
 	$(CP) lsc-boot.sys /mnt/lsc/hd0p2/
-	ln /mnt/lsc/hd0p2/lsc-boot.sys /mnt/lsc/hd0p2/lsc.sys
 	
 lsc-boot.sys: start16.o start64.o TIMER.o ATA.o MINIX_FS.o BMP.o  VESA.o  Main.o 
 	$(LD) $(LDSCRIPT) $(LD_SCRIPT64) $(OUTPUT) $@ $^
