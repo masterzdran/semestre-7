@@ -3,7 +3,6 @@ DSK_HOME = /home/masterzdran/WorkingArea/Isel/semestre-7/LSC/dsk
 install: lsc-boot.sys lscboot.bin
 	rm -f /mnt/lsc/hd0p2/*.sys
 	cp lsc-boot.sys /mnt/lsc/hd0p2/
-	ln /mnt/lsc/hd0p2/lsc-boot.sys /mnt/lsc/hd0p2/lsc.sys
 
 lscboot.bin: lscboot.o
 	ld -T bootrec.ld -o lscboot.bin lscboot.o

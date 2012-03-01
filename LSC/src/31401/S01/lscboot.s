@@ -21,7 +21,7 @@ norm_cs:
 #------------------------------------------------------------------------------
 	sti                      	# interrupts enabled after initializing
 
-	movb %dl, disk_id         	#save active disk id
+	movb %dl, disk_id			#save active disk id
 								#the value present in DL when BIOS jumped to 0x7C00 is driveid
 
 
@@ -55,6 +55,7 @@ ReadSuperBlock:
 	movb $0x42, %ah
 	int $0x13
 		###break 0x7c41
+		
 #------------------------------------------------------------------------------
 #                                 Searching Files
 #------------------------------------------------------------------------------
@@ -69,13 +70,13 @@ WhileFileSearch:
 	cmp $0, -2(%si)					#if next byte after i-node is 0 file don't exist -> exit
 	jz FileNotFound
 	
-	cld								#clear direction flag						
+	cld								#clear direction flag
 	repe cmpsb		
 	cmp $0, %cx		
 	jz FileFound
 	#reset search
 	movw $filename, %di				#name of file to search in %di
-	addw $0x20 , %si					#move to next file name
+	addw $0x20 , %si				#move to next file name
 	addw %cx, %si					#si to point to begin of next file name, not middle
 	movw filename_length, %cx		#using the remaining value of cx and filename length
 	subw %cx, %si
@@ -202,8 +203,8 @@ stop:
 	jmp stop
 
 .section .rodata         			# program constants (no real protection)
-	filename: 			.asciz "lsc.sys"
-	filename_length:	.word 8
+	filename: 			.asciz "lsc-boot.sys"
+	filename_length:	.word 13
 	first_sector: 		.word 0xA950		#first sector...
       
       

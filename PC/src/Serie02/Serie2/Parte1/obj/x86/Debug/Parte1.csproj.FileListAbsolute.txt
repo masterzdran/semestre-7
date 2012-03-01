@@ -1,0 +1,5 @@
+D:\ISEL\Semestre7\PC\src\serie02\Serie2\Parte1\bin\Debug\Parte1.exe
+D:\ISEL\Semestre7\PC\src\serie02\Serie2\Parte1\bin\Debug\Parte1.pdb
+D:\ISEL\Semestre7\PC\src\serie02\Serie2\Parte1\obj\x86\Debug\ResolveAssemblyReference.cache
+D:\ISEL\Semestre7\PC\src\serie02\Serie2\Parte1\obj\x86\Debug\Parte1.exe
+D:\ISEL\Semestre7\PC\src\serie02\Serie2\Parte1\obj\x86\Debug\Parte1.pdb
