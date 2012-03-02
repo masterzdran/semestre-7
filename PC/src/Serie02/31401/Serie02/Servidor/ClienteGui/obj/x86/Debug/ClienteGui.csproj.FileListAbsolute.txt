@@ -1,0 +1,9 @@
+C:\WorkingArea\Programação Concurrente\Serie02\Servidor\ClienteGui\bin\Debug\ClienteGui.exe
+C:\WorkingArea\Programação Concurrente\Serie02\Servidor\ClienteGui\bin\Debug\ClienteGui.pdb
+C:\WorkingArea\Programação Concurrente\Serie02\Servidor\ClienteGui\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\WorkingArea\Programação Concurrente\Serie02\Servidor\ClienteGui\obj\x86\Debug\ClienteGui.Form1.resources
+C:\WorkingArea\Programação Concurrente\Serie02\Servidor\ClienteGui\obj\x86\Debug\ClienteGui.Properties.Resources.resources
+C:\WorkingArea\Programação Concurrente\Serie02\Servidor\ClienteGui\obj\x86\Debug\GenerateResource.read.1.tlog
+C:\WorkingArea\Programação Concurrente\Serie02\Servidor\ClienteGui\obj\x86\Debug\GenerateResource.write.1.tlog
+C:\WorkingArea\Programação Concurrente\Serie02\Servidor\ClienteGui\obj\x86\Debug\ClienteGui.exe
+C:\WorkingArea\Programação Concurrente\Serie02\Servidor\ClienteGui\obj\x86\Debug\ClienteGui.pdb

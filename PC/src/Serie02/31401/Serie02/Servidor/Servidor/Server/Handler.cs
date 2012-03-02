@@ -21,8 +21,6 @@ namespace Tracker
         }
         private static void ProcessRegisterMessage(StreamReader input, StreamWriter output, Logger log)
         {
-            lock (MESSAGE_HANDLERS)
-            {
                 string line;
                 while ((line = input.ReadLine()) != null && line != string.Empty)
                 {
@@ -41,12 +39,9 @@ namespace Tracker
                     }
                     Store.Instance.Register(triple[0], new IPEndPoint(ipAddress, port));
                 }
-            }
         }
         private static void ProcessUnregisterMessage(StreamReader input, StreamWriter output, Logger log)
         {
-            lock (MESSAGE_HANDLERS)
-            {
                 string line;
                 while ((line = input.ReadLine()) != null && line != string.Empty)
                 {
@@ -65,7 +60,6 @@ namespace Tracker
                     }
                     Store.Instance.Unregister(triple[0], new IPEndPoint(ipAddress, port));
                 }
-            }
         }
         private static void ProcessListFilesMessage(StreamReader input, StreamWriter output, Logger log)
         {

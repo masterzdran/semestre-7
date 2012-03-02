@@ -26,15 +26,18 @@ namespace Tracker
             clientConnected.Reset();
             try
             {
-                srv = new TcpListener(IPAddress.Loopback, portNumber);
-                srv.Start();
-
-                srv.BeginAcceptTcpClient(new AsyncCallback(AsyncActionCallBack), srv);
-                lock (_log)
+                while (!_IsInShutDownMode)
                 {
-                    _log.LogMessage("Listener - Waiting for connection requests.");
+                    srv = new TcpListener(IPAddress.Loopback, portNumber);
+                    srv.Start();
+
+                    srv.BeginAcceptTcpClient(new AsyncCallback(AsyncActionCallBack), srv);
+                    lock (clientConnected)
+                    {
+                        _log.LogMessage("Listener - Waiting for connection requests.");
+                    }
+                    clientConnected.WaitOne();
                 }
-                clientConnected.WaitOne();
             }
             catch (SocketException e)
             {
@@ -42,19 +45,42 @@ namespace Tracker
             }
             finally
             {
-                _IsInShutDownMode = true;
                 lock (clientConnected)
                 {
-                    if (_NbrActiveConnections > 0)
-                    {
+                    _IsInShutDownMode = true; //por causa da excepção
+                    while(_NbrActiveConnections > 0)
                         clientConnected.WaitOne();
-                    }
                 }
                 _log.LogMessage("Listener - Ending.");
                 srv.Stop();
             }
         }
 
+        public void Shutdown()
+        {
+            lock (clientConnected) { _IsInShutDownMode = true; }
+        }
+
+        void ActionCallBack(Socket socket,Logger log)
+        {
+            int nbrCon = 0;
+            lock (clientConnected)
+            {
+                nbrCon = Interlocked.Increment(ref _NbrActiveConnections);
+            }
+            Handler protocolHandler = new Handler(new NetworkStream(socket), log);
+            protocolHandler.Run();
+            Program.ShowInfo(Store.Instance);
+
+            lock (clientConnected)
+            {
+                nbrCon = Interlocked.Decrement(ref _NbrActiveConnections);
+                if (_IsInShutDownMode && _NbrActiveConnections == 0)
+                    clientConnected.Set();
+            }
+            
+
+        }
         void AsyncActionCallBack(IAsyncResult ar)
         {
             TcpClient socket = null;
@@ -62,22 +88,13 @@ namespace Tracker
             {
                 TcpListener tcp = (TcpListener)ar.AsyncState;
                 Socket clientSocket = tcp.EndAcceptSocket(ar);
-                clientSocket.ReceiveTimeout = 2000;
-                using (socket = tcp.AcceptTcpClient())
-                {
-                    _log.LogMessage(String.Format("Listener - Connection established with {0}.", socket.Client.RemoteEndPoint));
+                clientConnected.Set();
 
-                    int nbrCon = Interlocked.Increment(ref _NbrActiveConnections);
-                    if (!_IsInShutDownMode)
-                        tcp.BeginAcceptSocket(new AsyncCallback(AsyncActionCallBack), tcp);
-                    socket.LingerState = new LingerOption(true, 10);
-                    Handler protocolHandler = new Handler(socket.GetStream(), _log);
-                    protocolHandler.Run();
-                    Program.ShowInfo(Store.Instance);
-                    nbrCon = Interlocked.Decrement(ref _NbrActiveConnections);
-                    clientConnected.Set();
-                }
+                _log.LogMessage(String.Format("Listener - Connection established with {0}.", socket.Client.RemoteEndPoint));
 
+                new Thread(
+                    () => { ActionCallBack(clientSocket, _log); }
+                ).Start();
             }
             catch (SocketException e)
             {

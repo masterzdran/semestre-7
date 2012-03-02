@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Servidor", "Servidor\Servidor.csproj", "{302A6E5B-79A0-40D2-8E7A-7B252D995907}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClienteGui", "ClienteGui\ClienteGui.csproj", "{A339D4A0-D1D1-4D6A-95A4-83539EBCF921}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -13,6 +15,10 @@ Global
 		{302A6E5B-79A0-40D2-8E7A-7B252D995907}.Debug|x86.Build.0 = Debug|x86
 		{302A6E5B-79A0-40D2-8E7A-7B252D995907}.Release|x86.ActiveCfg = Release|x86
 		{302A6E5B-79A0-40D2-8E7A-7B252D995907}.Release|x86.Build.0 = Release|x86
+		{A339D4A0-D1D1-4D6A-95A4-83539EBCF921}.Debug|x86.ActiveCfg = Debug|x86
+		{A339D4A0-D1D1-4D6A-95A4-83539EBCF921}.Debug|x86.Build.0 = Debug|x86
+		{A339D4A0-D1D1-4D6A-95A4-83539EBCF921}.Release|x86.ActiveCfg = Release|x86
+		{A339D4A0-D1D1-4D6A-95A4-83539EBCF921}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
