@@ -34,7 +34,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>TestClient.Program</StartupObject>
+    <StartupObject>Tracker.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

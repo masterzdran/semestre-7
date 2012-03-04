@@ -28,56 +28,58 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.Register = new System.Windows.Forms.Button();
-            this.Unregister = new System.Windows.Forms.Button();
-            this.ListFiles = new System.Windows.Forms.Button();
-            this.ListLocations = new System.Windows.Forms.Button();
+            this.Register_btn = new System.Windows.Forms.Button();
+            this.Unregister_btn = new System.Windows.Forms.Button();
+            this.ListFiles_btn = new System.Windows.Forms.Button();
+            this.ListLocations_btn = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.textBox3 = new System.Windows.Forms.TextBox();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.Ficheiros = new System.Windows.Forms.TextBox();
+            this.Host = new System.Windows.Forms.TextBox();
+            this.Porto = new System.Windows.Forms.TextBox();
+            this.Consola = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
             // Register
             // 
-            this.Register.Location = new System.Drawing.Point(12, 21);
-            this.Register.Name = "Register";
-            this.Register.Size = new System.Drawing.Size(96, 37);
-            this.Register.TabIndex = 0;
-            this.Register.Text = "Register";
-            this.Register.UseVisualStyleBackColor = true;
-            this.Register.Click += new System.EventHandler(this.button1_Click);
+            this.Register_btn.Location = new System.Drawing.Point(12, 21);
+            this.Register_btn.Name = "Register";
+            this.Register_btn.Size = new System.Drawing.Size(96, 37);
+            this.Register_btn.TabIndex = 0;
+            this.Register_btn.Text = "Register";
+            this.Register_btn.UseVisualStyleBackColor = true;
+            this.Register_btn.Click += new System.EventHandler(this.Register_Click);
             // 
             // Unregister
             // 
-            this.Unregister.Location = new System.Drawing.Point(12, 96);
-            this.Unregister.Name = "Unregister";
-            this.Unregister.Size = new System.Drawing.Size(96, 37);
-            this.Unregister.TabIndex = 1;
-            this.Unregister.Text = "Unregister";
-            this.Unregister.UseVisualStyleBackColor = true;
+            this.Unregister_btn.Location = new System.Drawing.Point(12, 96);
+            this.Unregister_btn.Name = "Unregister";
+            this.Unregister_btn.Size = new System.Drawing.Size(96, 37);
+            this.Unregister_btn.TabIndex = 1;
+            this.Unregister_btn.Text = "Unregister";
+            this.Unregister_btn.UseVisualStyleBackColor = true;
+            this.Unregister_btn.Click += new System.EventHandler(this.Unregister_Click);
             // 
             // ListFiles
             // 
-            this.ListFiles.Location = new System.Drawing.Point(12, 246);
-            this.ListFiles.Name = "ListFiles";
-            this.ListFiles.Size = new System.Drawing.Size(96, 36);
-            this.ListFiles.TabIndex = 2;
-            this.ListFiles.Text = "List Files";
-            this.ListFiles.UseVisualStyleBackColor = true;
+            this.ListFiles_btn.Location = new System.Drawing.Point(12, 246);
+            this.ListFiles_btn.Name = "ListFiles";
+            this.ListFiles_btn.Size = new System.Drawing.Size(96, 36);
+            this.ListFiles_btn.TabIndex = 2;
+            this.ListFiles_btn.Text = "List Files";
+            this.ListFiles_btn.UseVisualStyleBackColor = true;
+            this.ListFiles_btn.Click += new System.EventHandler(this.ListFiles_Click);
             // 
             // ListLocations
             // 
-            this.ListLocations.Location = new System.Drawing.Point(12, 171);
-            this.ListLocations.Name = "ListLocations";
-            this.ListLocations.Size = new System.Drawing.Size(96, 37);
-            this.ListLocations.TabIndex = 3;
-            this.ListLocations.Text = "List Locations";
-            this.ListLocations.UseVisualStyleBackColor = true;
-            this.ListLocations.Click += new System.EventHandler(this.button4_Click);
+            this.ListLocations_btn.Location = new System.Drawing.Point(12, 171);
+            this.ListLocations_btn.Name = "ListLocations";
+            this.ListLocations_btn.Size = new System.Drawing.Size(96, 37);
+            this.ListLocations_btn.TabIndex = 3;
+            this.ListLocations_btn.Text = "List Locations";
+            this.ListLocations_btn.UseVisualStyleBackColor = true;
+            this.ListLocations_btn.Click += new System.EventHandler(this.ListLocations_Click);
             // 
             // label1
             // 
@@ -106,51 +108,55 @@
             this.label3.TabIndex = 6;
             this.label3.Text = "Port";
             // 
-            // textBox1
+            // Ficheiros
             // 
-            this.textBox1.Location = new System.Drawing.Point(148, 21);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(270, 20);
-            this.textBox1.TabIndex = 7;
+            this.Ficheiros.Location = new System.Drawing.Point(148, 21);
+            this.Ficheiros.Name = "Ficheiros";
+            this.Ficheiros.Size = new System.Drawing.Size(270, 20);
+            this.Ficheiros.TabIndex = 7;
             // 
-            // textBox2
+            // Host
             // 
-            this.textBox2.Location = new System.Drawing.Point(148, 63);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(100, 20);
-            this.textBox2.TabIndex = 8;
+            this.Host.Location = new System.Drawing.Point(148, 63);
+            this.Host.Name = "Host";
+            this.Host.Size = new System.Drawing.Size(100, 20);
+            this.Host.TabIndex = 8;
             // 
-            // textBox3
+            // Porto
             // 
-            this.textBox3.Location = new System.Drawing.Point(278, 63);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(44, 20);
-            this.textBox3.TabIndex = 9;
+            this.Porto.Location = new System.Drawing.Point(278, 63);
+            this.Porto.Name = "Porto";
+            this.Porto.Size = new System.Drawing.Size(44, 20);
+            this.Porto.TabIndex = 9;
             // 
-            // richTextBox1
+            // Consola
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(148, 90);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(270, 193);
-            this.richTextBox1.TabIndex = 10;
-            this.richTextBox1.Text = "";
+            this.Consola.AcceptsTab = true;
+            this.Consola.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.Consola.ForeColor = System.Drawing.SystemColors.HotTrack;
+            this.Consola.Location = new System.Drawing.Point(148, 90);
+            this.Consola.Name = "Consola";
+            this.Consola.ReadOnly = true;
+            this.Consola.Size = new System.Drawing.Size(270, 193);
+            this.Consola.TabIndex = 10;
+            this.Consola.Text = "";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(431, 304);
-            this.Controls.Add(this.richTextBox1);
-            this.Controls.Add(this.textBox3);
-            this.Controls.Add(this.textBox2);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.Consola);
+            this.Controls.Add(this.Porto);
+            this.Controls.Add(this.Host);
+            this.Controls.Add(this.Ficheiros);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.ListLocations);
-            this.Controls.Add(this.ListFiles);
-            this.Controls.Add(this.Unregister);
-            this.Controls.Add(this.Register);
+            this.Controls.Add(this.ListLocations_btn);
+            this.Controls.Add(this.ListFiles_btn);
+            this.Controls.Add(this.Unregister_btn);
+            this.Controls.Add(this.Register_btn);
             this.Name = "Form1";
             this.Text = "ClienteGui";
             this.ResumeLayout(false);
@@ -160,17 +166,17 @@
 
         #endregion
 
-        private System.Windows.Forms.Button Register;
-        private System.Windows.Forms.Button Unregister;
-        private System.Windows.Forms.Button ListFiles;
-        private System.Windows.Forms.Button ListLocations;
+        private System.Windows.Forms.Button Register_btn;
+        private System.Windows.Forms.Button Unregister_btn;
+        private System.Windows.Forms.Button ListFiles_btn;
+        private System.Windows.Forms.Button ListLocations_btn;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.TextBox Ficheiros;
+        private System.Windows.Forms.TextBox Host;
+        private System.Windows.Forms.TextBox Porto;
+        private System.Windows.Forms.RichTextBox Consola;
     }
 }
 

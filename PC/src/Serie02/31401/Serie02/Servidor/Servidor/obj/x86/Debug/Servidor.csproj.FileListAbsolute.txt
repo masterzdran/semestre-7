@@ -1,5 +1,5 @@
-C:\WorkingArea\Programação Concurrente\Serie02\Servidor\Servidor\obj\x86\Debug\ResolveAssemblyReference.cache
 C:\WorkingArea\Programação Concurrente\Serie02\Servidor\Servidor\bin\Debug\Servidor2.exe
 C:\WorkingArea\Programação Concurrente\Serie02\Servidor\Servidor\bin\Debug\Servidor2.pdb
+C:\WorkingArea\Programação Concurrente\Serie02\Servidor\Servidor\obj\x86\Debug\ResolveAssemblyReference.cache
 C:\WorkingArea\Programação Concurrente\Serie02\Servidor\Servidor\obj\x86\Debug\Servidor2.exe
 C:\WorkingArea\Programação Concurrente\Serie02\Servidor\Servidor\obj\x86\Debug\Servidor2.pdb
