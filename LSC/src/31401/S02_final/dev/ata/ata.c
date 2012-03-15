@@ -1,60 +1,56 @@
 #include "ata.h"
-// Source :  http://wiki.osdev.org/ATA_PIO_Mode
-static U32 ATA_disk_is_ready(U16 bus) //0x1F7
+
+#define Pause_for_400ns()                  {inb(STATUS_REGISTER);inb(STATUS_REGISTER);inb(STATUS_REGISTER);inb(STATUS_REGISTER);}
+
+U32 ATA_read(U32 LBA, U16* buffer, U16 numberOfSectors)
 {
-	inb(bus);
-	inb(bus);
-	inb(bus);
-	inb(bus);
-	while( ( inb(bus) & 0x80 ) == 0x80  ||  ( inb(bus) & 0x29 ) == 0 ); // check if drive is busy or if all of those are clear
-	if((inb(bus)&0x21)!=0) return -1; //return error...
-	return 0; 
-}
-
-U32 ATA_read(U16 * destination_buffer, U32 LBA, U16 nr_sectors){
-	U32 base;
-	U32 count;
-	U32 count_sectors;
-	U32 slave=0;
-	//LBA = 0xA950 - absolute LBA addr representing the beggining of the X partition
-	//stop the current device from sending interrupts on primary bus...
-	outb(nIEN,DEVICE_CONTROL_REGISTER);
-				
-	//Send a NULL byte to port 0x1F1, if you like (it is ignored and wastes lots of CPU time): 
-	outb(NULL,ERROR_REGISTER);
+	U16 nos=0;
+	//1. Wait for BSY == 0
+	while(inb(STATUS_REGISTER) & BSY_BIT);
+	//2. Write 0xE0 (LBA mode, Master dev.) ored with 27:24 bits of the LBA address to port 6
+	outb((MASTER | ((LBA >> WORD_AND_HALF_SHIFT) & NIBBLE_MASK)), HEAD_PORT);
+	//3. Pause for 400ns
+	Pause_for_400ns();
+	//4. Write 23:16 bits of the LBA address to port 5
+	outb( (LBA >> WORD_SHIFT) & BYTE_MASK , CYLINDER_HIGH);
+	//5. Write 15:8 bits of the LBA address to port 4
+	outb( (LBA >> BYTE_SHIFT) & BYTE_MASK , CYLINDER_LOW);
+	//6. Write 7:0 bits of the LBA address to port 3
+	outb( LBA & BYTE_MASK , SECTOR_NUMBER);
+	//7. Write the number of sectors to read to port 2 (note: 0 means 256)
+	outb( numberOfSectors , SECTOR_COUNT);
+	//8. Write 0 (PIO mode) to port 1
+	outb(PIO_MODE,FEATURES_REGISTER);
+	//9. Write 0x20 to port 7
+	outb(0x20,COMMAND_REGISTER);
+	//10. Pause for 400ns
+	Pause_for_400ns() ;
 	
-	//Send the sectorcount to port 0x1F2: 
-	outb((U8) nr_sectors, SECTOR_COUNT);
-	
-	//Send the low 8 bits of the LBA to port 0x1F3: 
-	outb((U8) LBA, SECTOR_NUMBER);
-	
-	//Send the next 8 bits of the LBA to port 0x1F4: 
-	outb((U8)(LBA >> BYTE_SHIFT), CYLINDER_LOW);
-	
-	//Send the next 8 bits of the LBA to port 0x1F5: 
-	outb((U8)(LBA >> WORD_SHIFT), CYLINDER_HIGH);
-	
-	//Send 0xE0 for the "master" or 0xF0 for the "slave", ORed with the highest 4 bits of the LBA to port 0x1F6:
-	outb(MASTER | (slave << NIBBLE_SHIFT) | ((LBA >> WORD_AND_HALF_SHIFT) & 0x0F), HEAD_PORT);
-	
-	//Send the "READ SECTORS" command (0x20) to port 0x1F7: 
-	outb(READ_SECTORS, COMMAND_PORT);
-
-	//Transfer 256 words, a word at a time, into your buffer from I/O port 0x1F0.
-	//Then loop back to waiting for the next IRQ (or poll again -- see next note) for _EACH SUCCESSIVE SECTOR_.
-	for( count_sectors = 0 ; count_sectors < nr_sectors ; ++count_sectors )
+	while(nos<numberOfSectors)
 	{
-		base = count_sectors*TRF_WORDS;
-		
-		//Wait for an IRQ or poll.
-		if(ATA_disk_is_ready(COMMAND_PORT)<0) return -1;
-		
-		for( count = 0 ; count<TRF_WORDS ; ++count )
+		//11. Wait for BSY == 0
+		while(inb(STATUS_REGISTER) & BSY_BIT);
+		//12. Wait for ERR == 1, DF == 1, or DRQ == 1
+		//13.	If ERR == 1 or DF ==1 the operation failed
+		if (inb(STATUS_REGISTER) & (ERR_BIT | DF_BIT))
 		{
-			destination_buffer[count + base] = inw(DATA_PORT);
+			return 1; //the operation failed;
 		}
+		//13.	else if DRQ == 1 data is ready to be read
+		else if(inb(STATUS_REGISTER) & DRQ_BIT)
+		{
+			//14. Use rep insw to read 1 sector (256 words) from port 0
+			
+			rep_insw(DATA_PORT, &buffer[nos*TRF_WORDS], TRF_WORDS);
+			++nos;
+		}
+		//15. If there all sector are read, exit; else goto 11			
 	}
-	
-	return 0;	
 }
+
+
+
+
+
+
+

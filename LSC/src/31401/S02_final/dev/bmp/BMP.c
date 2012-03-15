@@ -20,22 +20,19 @@
 #include "BMP.h"
 #include "VESA.h"
 #define MASK   0xFF
-#define SHIFT        3
-#define BYTE_SHIFT   8
-#define WORD_SHITT   16
 int DisplayBMPImage(void * image_ptr){
-	int line , col=0 , display = 0;
-   
-	RGB * color = ((BITMAPINFO*)(image_ptr))->color;
-
-	for(line=MAX_LINE -1 ; line >= 0 ; --line )
+	int line=0 , col=0;
+	BITMAPINFO* bitmap = (BITMAPINFO*)(image_ptr);
+	RGB * pixelPtr = bitmap->color; //para poder iterar pelos pixeis da imagem.
+	RGBPixel pixel;
+	for(line= bitmap->info.height-1 ; line >= 0 ; --line )
 	{
-		for(col=0;col < MAX_COL; ++col,color++)
+		for(col=0;col < bitmap->info.width; ++col,pixelPtr++)
 		{
-			display  = (  color->red  )>>SHIFT & MASK ;
-			display |= ( (color->green)>>SHIFT & MASK ) << BYTE_SHIFT; 
-			display |= ( (color->blue )>>SHIFT & MASK ) << WORD_SHITT; 
-			DisplayPixel( display, line,	col );
+			pixel.B = (pixelPtr->blue  >>3 ) & MASK;
+			pixel.G = (pixelPtr->green >>2 ) & MASK;
+			pixel.R = (pixelPtr->red   >>3 ) & MASK;
+			DisplayPixel( pixel, line,	col );
 		}
 	}
 }

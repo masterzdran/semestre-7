@@ -20,7 +20,8 @@
 #ifndef __IO_H__
 #define __IO_H__
 #include "Types.h"
-// Source : http://www.cs.fsu.edu/~baker/devices/lxr/http/source/linux/arch/x86/boot/boot.h
+// Source : http://lxr.linux.no/linux+v2.6.32.34/arch/x86/include/asm/io_32.h#L186
+// Source : http://lxr.linux.no/#linux+v2.6.32.34/arch/x86/boot/boot.h
 static inline void outb(U8 v, U16 port)
 {
     asm volatile("outb %0,%1" : : "a" (v), "dN" (port));
@@ -39,5 +40,8 @@ static inline U16 inw(U16 port)
 	asm volatile("inw %1,%0" : "=a" (v) : "dN" (port));
 	return v;
 }
-
+static inline void rep_insw(int port, void *addr, unsigned long count)
+{									
+	asm volatile("rep; insw" : "+D"(addr), "+c"(count) : "d"(port));
+}
 #endif

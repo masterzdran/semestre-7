@@ -45,5 +45,5 @@
 #define ACTION             (0x34)
 #define RESET_VALUE        (0x2E90)
 void Timer_start();
-void Timer_delay(long milis);
+void Timer_delay(long elapse);
 #endif

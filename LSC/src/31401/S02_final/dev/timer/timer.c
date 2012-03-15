@@ -21,39 +21,30 @@
 #include "io.h"
 #define BYTE 8
 
-static int lastCount = 0;
-static void Timer_reset(unsigned int milis)
-{
-	outb( milis        & LOW_BYTE_MASK,  __SELECT_COUNTER_0__);        
-	outb((milis>> BYTE)& LOW_BYTE_MASK,  __SELECT_COUNTER_0__);   
-}
+#define FREQUENCY 1193180  
+#define MILI		1000
+#define SECOND		1
+#define DEFAULT_MS	10
 
 void Timer_start()
 {
+	int timerSetup = (FREQUENCY/MILI)*DEFAULT_MS;
 	outb(ACTION,__CONTROL__);
-	Timer_reset(RESET_VALUE);
+	outb( timerSetup         & LOW_BYTE_MASK,  __SELECT_COUNTER_0__);        
+	outb((timerSetup >> BYTE)& LOW_BYTE_MASK,  __SELECT_COUNTER_0__);  
 }
 
-static unsigned int Timer_read()
+static S32 Timer_elapsed(int last_read)
 {
 	outb(0,__CONTROL__);                   
-	int data  = inb(__SELECT_COUNTER_0__); 
-	    data += inb(__SELECT_COUNTER_0__)<< BYTE;
-	return data;
+	int timer_read  = inb(__SELECT_COUNTER_0__); 
+	    timer_read += inb(__SELECT_COUNTER_0__)<< BYTE;
+	return timer_read -  last_read;  
 }
 
-static unsigned int Timer_cycles()
+void Timer_delay(long elapse)
 {
-	int aux = Timer_read();
-	int res = lastCount - aux;
-	lastCount = aux;
-	return 	( res ) < 0 ? 1 : 0;
-}
-
-void Timer_delay(long milis)
-{
-	while(milis>0)
-	{
-		if(Timer_cycles()>0)milis -=10 ;
-	}
+    U32 time;
+    time = Timer_elapsed(0);
+    while(Timer_elapsed(time)<= elapse);
 }

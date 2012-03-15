@@ -18,12 +18,13 @@
 #=====================================================================
 */
 #include "VESA.h"
+#define MAX_LINE 600
+#define MAX_COL  800
 typedef RGBPixel PCScreen[MAX_LINE][MAX_COL];
 PCScreen * const screen = (PCScreen*)0x800000; 
 #define SCREEN (*screen)
 
-void DisplayPixel(U32 color, U32 line, U32 column)
+void DisplayPixel(RGBPixel pixel, U32 line, U32 column)
 {
-	RGBPixel aux = { (color >>16) & 0xff, ((color >>8) & 0xff)<<1, color & 0xff };
-	SCREEN[line][column] = aux;
+	SCREEN[line][column] = pixel;
 }
