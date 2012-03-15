@@ -21,6 +21,7 @@
 #define __BMP_H__
 
 #include "Types.h"
+#include "VESA.h"
 //Source :  http://paulbourke.net/dataformats/bmp/BITMAP.H
 
 typedef struct{
@@ -56,6 +57,7 @@ typedef struct {
 	RGB color[1];
 } __attribute__((packed)) BITMAPINFO; 
 
-int DisplayBMPImage(void * image_ptr);
+void DisplayBMPImage(void * image_ptr);
+void DisplayColor(RGBPixel color);
 
 #endif

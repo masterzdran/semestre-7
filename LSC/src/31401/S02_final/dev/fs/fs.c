@@ -3,10 +3,12 @@
 //#include <stdlib.h>
 
 
+#define DIRECT_NUMBER_OF_ZONES 		7
+#define DIRECT_ZONE_START_NUMBER	0
 
 
 static Directory 		dirbuffer[22];
-static const char* IMAGE_FOLDER="image";
+static const char* IMAGE_FOLDER="imagens";
 
 // Source : http://freebsd.active-venture.com/FreeBSD-srctree/newsrc/libkern/strcmp.c.html
 int strcmp(s1, s2)
@@ -18,7 +20,7 @@ int strcmp(s1, s2)
 	return (*(const unsigned char *)s1 - *(const unsigned char *)(s2 - 1));
 }
 
-/*
+/**
 static U32 BASE_ADDR;
 U32 ATA_read(U32 LBA, void* buffer, U16 numberOfSectors)
 {
@@ -44,7 +46,7 @@ U32 ATA_read(U32 LBA, void* buffer, U16 numberOfSectors)
     }
     return 0;
 }
-* */
+*/
 /**
  * The partition table is located at the end of the master boot record, 
  * which occupies the first physical sector of the hard disk.
@@ -89,7 +91,7 @@ static void showInodeContent(Partition* partition,INode* node)
 	}
 }
 */
-static U32 imagesFolder(Partition* partition,INode* rootINode, const char* imageFolder)
+static U32 imagesFolder(Partition* partition,INode* rootINode, char* imageFolder)
 {
 	int i=0;
 	U32 addr = rootINode->i_zone[0] * ZONE_SIZE + partition->LBA_Start*SECTOR_SIZE ;
@@ -99,12 +101,10 @@ static U32 imagesFolder(Partition* partition,INode* rootINode, const char* image
 			break;
 		if(strcmp(dirbuffer[i].name,imageFolder) == 0)
 		{
-			//TODO: Delete Printf
-			//printf("Esta é a pasta de imagens:[%0i][%s]\n",dirbuffer[i].inode,dirbuffer[i].name);
 			return dirbuffer[i].inode;
 		}
 	}
-	return 0;
+	return 255;
 }
 
 /**
@@ -119,19 +119,16 @@ static U32 getImagesINodes(Partition* partition,INode* rootINode,INode* InodeBuf
 	U32 address;
 	INode mbr_buffer[INODE_BUFFER]; 
 	
-	for (i=0;i<22;++i){
+	for (i=0;i<32;++i){
 		if(dirbuffer[i].inode == 0)
 			break;
 		if(strcmp(dirbuffer[i].name,".") != 0 && strcmp(dirbuffer[i].name,"..") != 0)
 		{
+			//printf("%s \n",dirbuffer[i].name);
 			address = baseAddress + (dirbuffer[i].inode-1)*INODE_SIZE;
-			//TODO: Delete Printf
-			//printf("Esta é uma imagem:[%0i][%s][%i]\n",dirbuffer[i].inode,dirbuffer[i].name,address);
 			ATA_read(address,(void*)mbr_buffer,ZONE);
 			InodeBuffer[j]=(INode)mbr_buffer[0];
 			++j;
-				//TODO: Delete Printf
-				//printf("\t\t SIZE: %i\n",InodeBuffer[j].i_size);
 		}
 	}
 	return j;
@@ -139,7 +136,8 @@ static U32 getImagesINodes(Partition* partition,INode* rootINode,INode* InodeBuf
 /**
  * "Carrega" todos os inodes válidos para um array passado por parametro.
  * */
-static U32 getINodes(Partition* partition, SuperBlock* superBlock,INode* mbr_buffer){
+static U32 getINodes(Partition* partition, SuperBlock* superBlock,INode* mbr_buffer)
+{
 	U32 imageNode=0;
 	U32 amt = 0;
 	
@@ -151,23 +149,16 @@ static U32 getINodes(Partition* partition, SuperBlock* superBlock,INode* mbr_buf
 	//Lê o primeiro INode, obtem o id do Inode que contem as imagens
 	ATA_read(inodeAddr,(void*)mbr_buffer,ZONE);
 	imageNode = imagesFolder(partition,&mbr_buffer[0],IMAGE_FOLDER);
-	//TODO: Delete this block
-	/*if (imageNode == 0){
-		printf("Não existe directoria de imagens %s",IMAGE_FOLDER);
-		exit(1);
-	}*/
+
+	if (imageNode == 255 ){return 255;}
 
 	//Calculo do endereço que contém o INode raiz das imagens
 	U32 address = inodeAddr + (imageNode-1)*INODE_SIZE;
-	//TODO: Delete Printf
-	//printf("[ %i ][ %i ][ %i ] <--- \n", address , inodeAddr,INODE_SIZE);
+
 	ATA_read(address,(void*)mbr_buffer,ZONE);
 	amt=getImagesINodes(partition,&mbr_buffer[0],mbr_buffer,inodeAddr);
 	return amt;
 }
-
-
-
 
 /**
  * Lê a última zona de indirecção.
@@ -175,48 +166,59 @@ static U32 getINodes(Partition* partition, SuperBlock* superBlock,INode* mbr_buf
  * do buffer de destino.
  * @baseAddress o endereço base absoluto deste nivel de indirecção. 
  * */
-
-static U32 ReadZone(U8* destinationStart,U32 baseAddress, U32 MaxRead)
+static U32 ReadZone(U8* destinationStart,U32 baseAddress,U32 zone, U32 MaxRead)
 {
 	U32 idx=0;
 	U32 address=0;
 	U32 status=0;
 	char zoneBuffer[ZONE_SIZE];
-
-	ATA_read(baseAddress,&zoneBuffer,ZONE);
+	address = baseAddress + zone*ZONE_SIZE;
+	ATA_read(address,&zoneBuffer,ZONE);
+	
+	int * baseBuffer = (int *) &zoneBuffer;
 	for(idx=0;idx<MaxRead;++idx)
 	{
-		if(zoneBuffer[idx] == 0) {status=1;break;}
-		address = baseAddress + zoneBuffer[idx]*ZONE_SIZE;
+		if(baseBuffer[idx] == 0) {status=1;break;}
+		address = baseAddress + baseBuffer[idx]*ZONE_SIZE;
 		ATA_read(address,destinationStart,ZONE);
 		destinationStart+=ZONE_SIZE;
 	}	
 	return status;
 }
 
-static U32 DirectZone(U8* destinationStart,U32 baseAddress)
+static U32 DirectZone(U8* destinationStart,U32 baseAddress,INode* imageNode)
 {
-	//?!?!?Sim eu sei.
-	return ReadZone(destinationStart,baseAddress,7);
+	U32 address = 0, idx = 0 , status = 0;
+	U8* ptr = destinationStart;
+	for (idx = DIRECT_ZONE_START_NUMBER;idx< DIRECT_NUMBER_OF_ZONES;++idx)
+	{
+		if ((U32)(imageNode->i_zone[idx]) == 0){status = 1; break;}
+		address = baseAddress + ((U32)imageNode->i_zone[idx])*ZONE_SIZE;
+		ATA_read(address,ptr,ZONE);
+		ptr+=ZONE_SIZE;
+	}
+	return status;
 }
 
-static U32 IndirectZone(U8* destinationStart,U32 baseAddress)
+static U32 IndirectZone(U8* destinationStart,U32 baseAddress,INode* imageNode)
 {
-	//?!?!?Sim eu sei.
-	return ReadZone(destinationStart,baseAddress,256);
+	if ((U32)(imageNode->i_zone[7]) == 0) return 1;
+	return ReadZone(destinationStart,baseAddress,imageNode->i_zone[7],256);
 }
 
-static U32 DoubleIndirectZone(U8* destinationStart,U32 baseAddress)
+static U32 DoubleIndirectZone(U8* destinationStart,U32 baseAddress,INode* imageNode)
 {
-	int idx=0,address=baseAddress;
-	U32 status=0;
+	if (imageNode->i_zone[8] == 0) return 1;
+	U32 idx=0, address=0, status=0;
+	
+	address = baseAddress + ((U32)(imageNode->i_zone[8]))*ZONE_SIZE;
 	char buffer[ZONE_SIZE];
 	ATA_read(address, &buffer,ZONE);
 	int * baseBuffer = (int *) &buffer;
 	for(idx = 0; idx < 256; idx++){
-		address=baseAddress + baseBuffer[idx]*ZONE_SIZE;
-		status = IndirectZone(destinationStart,address);
-		destinationStart+=(idx+1)*ZONE_SIZE;
+		//address=baseAddress + baseBuffer[idx]*ZONE_SIZE;
+		status = ReadZone(destinationStart,baseAddress,baseBuffer[idx],256);
+		destinationStart += ZONE_SIZE;
 		if (status){break;}
 	}	   
 	return status;
@@ -236,26 +238,33 @@ static U32 DoubleIndirectZone(U8* destinationStart,U32 baseAddress)
 U32 Minix_ReadFileDataZone(Partition* partition, INode* imageNode, U8* destination)
 {
 	U32 status=0;
-	//TODO: Delete printf
-	//printf("\t %i\n",imageNode->i_size);
+
 	//endereço base
-	U32 dataAddress = imageNode->i_zone[0] * ZONE_SIZE + partition->LBA_Start*SECTOR_SIZE ;
-	//Chamar as zonas directas. Falta testar retorno.
-	status=DirectZone(destination,dataAddress);
+	//U32 dataAddress = imageNode->i_zone[0] * ZONE_SIZE + partition->LBA_Start*SECTOR_SIZE ;
+	U32 dataAddress = partition->LBA_Start*SECTOR_SIZE ;
+
+	//Chamar as zonas directas.
+	status=DirectZone(destination,dataAddress,imageNode);
 	if(status) return status;
+
 	//recolocar o ponteiro
-	destination+= 7 * ZONE_SIZE;
+	destination += 7 * ZONE_SIZE;
+
 	//recalcular o endereço base
-	dataAddress=imageNode->i_zone[7] * ZONE_SIZE + partition->LBA_Start*SECTOR_SIZE ;
-	//Chamar as zonas de 1 indirecção. Falta testar retorno.
-	status=IndirectZone(destination,dataAddress);
+	//dataAddress=imageNode->i_zone[7] * ZONE_SIZE + partition->LBA_Start*SECTOR_SIZE ;
+
+	//Chamar as zonas de 1 indirecção.
+	status=IndirectZone(destination,dataAddress,imageNode);
 	if(status) return status;
+
 	//recolocar o ponteiro
 	destination+= 256 * ZONE_SIZE;
+
 	//recalcular o endereço base
-	dataAddress=imageNode->i_zone[8] * ZONE_SIZE + partition->LBA_Start*SECTOR_SIZE ;
-	//Chamar as zonas de 2 indirecção. Falta testar retorno.
-	status=DoubleIndirectZone(destination,dataAddress);
+	//dataAddress=imageNode->i_zone[8] * ZONE_SIZE + partition->LBA_Start*SECTOR_SIZE ;
+
+	//Chamar as zonas de 2 indirecção.
+	status=DoubleIndirectZone(destination,dataAddress,imageNode);
 	return status;
 	
 }
@@ -273,3 +282,17 @@ U32 Minix_LoadImages(Partition* partition, SuperBlock* superBlock,INode* mbr_buf
 }
 
 
+/*
+int main(int argc, char **argv)
+{
+PartitionTable table;
+SuperBlock superblock;
+INode	inodeBuffer[INODE_BUFFER];
+	Minix_Start(&table,&superblock);
+	U32 imageNbr=0, idx=0, status;
+	//Obtem os inodes das Imagens
+	imageNbr = Minix_LoadImages(&(table.Table),&superblock,inodeBuffer);
+	printf("Numero de imagens: %i\n", imageNbr);
+	return 0;
+}
+*/

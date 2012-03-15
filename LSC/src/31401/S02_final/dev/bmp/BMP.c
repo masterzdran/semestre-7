@@ -18,9 +18,8 @@
 #=====================================================================
 */
 #include "BMP.h"
-#include "VESA.h"
 #define MASK   0xFF
-int DisplayBMPImage(void * image_ptr){
+void DisplayBMPImage(void * image_ptr){
 	int line=0 , col=0;
 	BITMAPINFO* bitmap = (BITMAPINFO*)(image_ptr);
 	RGB * pixelPtr = bitmap->color; //para poder iterar pelos pixeis da imagem.
@@ -36,4 +35,11 @@ int DisplayBMPImage(void * image_ptr){
 		}
 	}
 }
-
+void DisplayColor(RGBPixel color){
+      int line,col;
+		for (line = 0;  line < 600; ++line) {
+			for (col = 0; col < 800; ++col) {
+				DisplayPixel(color, line, col);
+         }
+		}
+}

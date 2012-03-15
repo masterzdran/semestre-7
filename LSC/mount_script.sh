@@ -1,7 +1,7 @@
 #home="/mnt/hgfs/D/ISEL/Semestre7"
 #username=isel
-home="/home/masterzdran/WorkingArea/Isel/semestre-7" 
-username=masterzdran
+home="/home/nac/WorkingArea/LSC/semestre-7" 
+username=nac
 
 if [ ! -d /mnt/lsc ];then
   sudo mkdir /mnt/lsc
