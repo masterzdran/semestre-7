@@ -53,7 +53,6 @@ void lsc_run()
 	
 	while(1){
 		if (imageNbr == 255){
-			imageNbr=11;
 			DisplayColor(green);
 			Timer_delay(1000);
 		}else{

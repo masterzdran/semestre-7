@@ -1,14 +1,15 @@
 #include "include_linux_minix_fs.h"
-//#include <stdio.h>
-//#include <stdlib.h>
-
+/**
+#include <stdio.h>
+#include <stdlib.h>
+**/
 
 #define DIRECT_NUMBER_OF_ZONES 		7
 #define DIRECT_ZONE_START_NUMBER	0
 
 
 static Directory 		dirbuffer[22];
-static const char* IMAGE_FOLDER="imagens";
+static char* IMAGE_FOLDER="imagens";
 
 // Source : http://freebsd.active-venture.com/FreeBSD-srctree/newsrc/libkern/strcmp.c.html
 int strcmp(s1, s2)
@@ -21,7 +22,7 @@ int strcmp(s1, s2)
 }
 
 /**
-static U32 BASE_ADDR;
+
 U32 ATA_read(U32 LBA, void* buffer, U16 numberOfSectors)
 {
 	FILE *fp;
@@ -46,7 +47,7 @@ U32 ATA_read(U32 LBA, void* buffer, U16 numberOfSectors)
     }
     return 0;
 }
-*/
+**/
 /**
  * The partition table is located at the end of the master boot record, 
  * which occupies the first physical sector of the hard disk.
@@ -96,15 +97,15 @@ static U32 imagesFolder(Partition* partition,INode* rootINode, char* imageFolder
 	int i=0;
 	U32 addr = rootINode->i_zone[0] * ZONE_SIZE + partition->LBA_Start*SECTOR_SIZE ;
 	ATA_read(addr,(void*)&dirbuffer,ZONE);
-	for (i=0;i<22;++i){
-		if(dirbuffer[i].inode == 0)
-			break;
+	for (i=0;i<32;++i){
+		//if(dirbuffer[i].inode == 0)
+		//	break;
 		if(strcmp(dirbuffer[i].name,imageFolder) == 0)
 		{
 			return dirbuffer[i].inode;
 		}
 	}
-	return 255;
+	return 0;
 }
 
 /**
@@ -150,7 +151,7 @@ static U32 getINodes(Partition* partition, SuperBlock* superBlock,INode* mbr_buf
 	ATA_read(inodeAddr,(void*)mbr_buffer,ZONE);
 	imageNode = imagesFolder(partition,&mbr_buffer[0],IMAGE_FOLDER);
 
-	if (imageNode == 255 ){return 255;}
+	if (imageNode == 0 ){return 255;}
 
 	//Calculo do endereço que contém o INode raiz das imagens
 	U32 address = inodeAddr + (imageNode-1)*INODE_SIZE;
@@ -281,18 +282,20 @@ U32 Minix_LoadImages(Partition* partition, SuperBlock* superBlock,INode* mbr_buf
 	return getINodes(partition,superBlock,mbr_buffer);
 }
 
+/**
 
-/*
 int main(int argc, char **argv)
 {
 PartitionTable table;
 SuperBlock superblock;
 INode	inodeBuffer[INODE_BUFFER];
 	Minix_Start(&table,&superblock);
-	U32 imageNbr=0, idx=0, status;
+	U32 imageNbr=0;
+	//idx=0, status;
 	//Obtem os inodes das Imagens
 	imageNbr = Minix_LoadImages(&(table.Table),&superblock,inodeBuffer);
 	printf("Numero de imagens: %i\n", imageNbr);
 	return 0;
 }
-*/
+
+**/
