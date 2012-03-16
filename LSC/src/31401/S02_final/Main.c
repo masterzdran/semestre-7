@@ -34,45 +34,6 @@ char * const image_ptr = (char*) 0x600000;
 //static SuperBlock superblock;
 //static INode	inodeBuffer[INODE_BUFFER];
 
-void lsc_startup()
-{
-	//Minix_Start(&table,&superblock);
-}
-void lsc_run()
-{
-	PartitionTable table;
-	SuperBlock superblock;
-	INode	inodeBuffer[INODE_BUFFER];
-	U32 imageNbr=0, idx=0, status;
-	Minix_Start(&table,&superblock);
-	//Obtem os inodes das Imagens
-	imageNbr = Minix_LoadImages(&(table.Table),&superblock,inodeBuffer);
-	RGBPixel green = {0,16,0};
-	RGBPixel blue = {16,0,0};
-	RGBPixel red = {0,0,16};
-	
-	while(1){
-		if (imageNbr == 255){
-			DisplayColor(green);
-			Timer_delay(1000);
-		}else{
-			DisplayColor(red);
-			Timer_delay(1000);
-		}
-		
-		for(idx=0;idx<imageNbr;++idx)
-		{
-			status = Minix_ReadFileDataZone(&(table.Table),&(inodeBuffer[idx]),image_ptr);
-			if (status)
-			{
-				DisplayColor(blue);
-				Timer_delay(1000);
-			}
-			DisplayBMPImage(image_ptr);
-		}
-		
-	}
-}
 /*
 void lsc_startup()
 {	
@@ -95,7 +56,42 @@ void lsc_run()
 }
 */
 void lsc_main() {
-	lsc_startup();
-	lsc_run();
+	PartitionTable table;
+	SuperBlock superblock;
+	INode	inodeBuffer[INODE_BUFFER];
+	U32 imageNbr=0, idx=0, status;
+	Minix_Start(&table,&superblock);
+		if (superblock.s_firstdatazone == 903){
+			RGBPixel green = {31,31,31};
+			DisplayColor(green);
+			Timer_delay(1000);
+		}
+	//Obtem os inodes das Imagens
+	imageNbr = Minix_LoadImages(&(table.Table),&superblock,inodeBuffer);
+	RGBPixel green = {0,16,0};
+	RGBPixel blue = {16,0,0};
+	RGBPixel red = {0,0,16};
+	
+	while(1){
+		if (imageNbr == 255){
+			DisplayColor(green);
+		}else{
+			DisplayColor(red);
+		}
+		Timer_delay(1000);
+
+		/*
+		for(idx=0;idx<imageNbr;++idx)
+		{
+			status = Minix_ReadFileDataZone(&(table.Table),&(inodeBuffer[idx]),image_ptr);
+			if (status)
+			{
+				DisplayColor(blue);
+				Timer_delay(1000);
+			}
+			DisplayBMPImage(image_ptr);
+		}
+		*/
+	}
 }
 

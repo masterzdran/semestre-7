@@ -1,8 +1,8 @@
 #include "include_linux_minix_fs.h"
-/**
+/*
 #include <stdio.h>
 #include <stdlib.h>
-**/
+*/
 
 #define DIRECT_NUMBER_OF_ZONES 		7
 #define DIRECT_ZONE_START_NUMBER	0
@@ -21,12 +21,12 @@ int strcmp(s1, s2)
 	return (*(const unsigned char *)s1 - *(const unsigned char *)(s2 - 1));
 }
 
-/**
-
+/*
 U32 ATA_read(U32 LBA, void* buffer, U16 numberOfSectors)
 {
 	FILE *fp;
 	int res;
+	LBA=LBA*SECTOR_SIZE;
 	//char buffer[1024];
 	if((fp = fopen("/home/nac/WorkingArea/LSC/semestre-7/LSC/dsk/lsc-hd63-flat.img", "rb")) == NULL)
 	{
@@ -47,7 +47,13 @@ U32 ATA_read(U32 LBA, void* buffer, U16 numberOfSectors)
     }
     return 0;
 }
-**/
+*/
+static void FS_READ (Partition* partition, U32 firstSector,U32 numberofSectors,void* destination)
+{
+	U32 address = partition->LBA_Start + firstSector;
+	ATA_read(address,destination,numberofSectors);
+}
+
 /**
  * The partition table is located at the end of the master boot record, 
  * which occupies the first physical sector of the hard disk.
@@ -73,11 +79,7 @@ void getPartitionTable(PartitionTable* partitionTable)
  * */
 void getSuperBlock(Partition* partition, SuperBlock* superBlock)
 {
-	//Calcula o endereço do SuperBlock
-	U32 superBlockAddr = partition->LBA_Start*SECTOR_SIZE + SUPER_BLOCK_LOCATION * SECTOR_SIZE;
-	
-	//Lê o bloco do SuperBlock, da partição correcta
-	ATA_read(superBlockAddr,(void*)superBlock,SUPER_BLOCK);
+	FS_READ(partition,SUPER_BLOCK_LOCATION,SUPER_BLOCK,(void*)superBlock);
 }
 /**
 static void showInodeContent(Partition* partition,INode* node)
@@ -95,11 +97,10 @@ static void showInodeContent(Partition* partition,INode* node)
 static U32 imagesFolder(Partition* partition,INode* rootINode, char* imageFolder)
 {
 	int i=0;
-	U32 addr = rootINode->i_zone[0] * ZONE_SIZE + partition->LBA_Start*SECTOR_SIZE ;
-	ATA_read(addr,(void*)&dirbuffer,ZONE);
+	FS_READ(partition,rootINode->i_zone[0]*2,ZONE,(void*)&dirbuffer);
 	for (i=0;i<32;++i){
-		//if(dirbuffer[i].inode == 0)
-		//	break;
+		if(dirbuffer[i].inode == 0)
+			continue;
 		if(strcmp(dirbuffer[i].name,imageFolder) == 0)
 		{
 			return dirbuffer[i].inode;
@@ -115,20 +116,17 @@ static U32 imagesFolder(Partition* partition,INode* rootINode, char* imageFolder
 static U32 getImagesINodes(Partition* partition,INode* rootINode,INode* InodeBuffer,U32 baseAddress)
 {
 	U32 i=0,j=0;
-	U32 addr = rootINode->i_zone[0] * ZONE_SIZE + partition->LBA_Start*SECTOR_SIZE ;
-	ATA_read(addr,(void*)&dirbuffer,ZONE);
-	U32 address;
+	FS_READ(partition,rootINode->i_zone[0]*2,ZONE,(void*)&dirbuffer);
+
 	INode mbr_buffer[INODE_BUFFER]; 
-	
+	FS_READ(partition,baseAddress,ZONE,&mbr_buffer);
 	for (i=0;i<32;++i){
 		if(dirbuffer[i].inode == 0)
-			break;
+			continue;
 		if(strcmp(dirbuffer[i].name,".") != 0 && strcmp(dirbuffer[i].name,"..") != 0)
 		{
-			//printf("%s \n",dirbuffer[i].name);
-			address = baseAddress + (dirbuffer[i].inode-1)*INODE_SIZE;
-			ATA_read(address,(void*)mbr_buffer,ZONE);
-			InodeBuffer[j]=(INode)mbr_buffer[0];
+			//printf("[%i][%i] -> %s \n",j,dirbuffer[i].inode,dirbuffer[i].name);
+			InodeBuffer[j]=(INode)mbr_buffer[dirbuffer[i].inode-1];
 			++j;
 		}
 	}
@@ -141,23 +139,14 @@ static U32 getINodes(Partition* partition, SuperBlock* superBlock,INode* mbr_buf
 {
 	U32 imageNode=0;
 	U32 amt = 0;
-	
-	//Calcula o endereço para o primeiro inode
-	U32 addr1 = partition->LBA_Start*SECTOR_SIZE + BOOT_BLOCK_SIZE + SUPER_BLOCK_SIZE;
-	U32 addr2 = superBlock->s_imap_blocks*ZONE_SIZE + superBlock->s_zmap_blocks* ZONE_SIZE;
-	U32 inodeAddr = addr1 + addr2;
-	
-	//Lê o primeiro INode, obtem o id do Inode que contem as imagens
-	ATA_read(inodeAddr,(void*)mbr_buffer,ZONE);
-	imageNode = imagesFolder(partition,&mbr_buffer[0],IMAGE_FOLDER);
+	U32 inodeAddr=BOOT_BLOCK + SUPER_BLOCK + superBlock->s_imap_blocks*2 + superBlock->s_zmap_blocks*2;
+	FS_READ(partition,inodeAddr,ZONE,(void*)mbr_buffer);
 
+	//Lê o primeiro INode, obtem o id do Inode que contem as imagens
+	imageNode = imagesFolder(partition,&mbr_buffer[0],IMAGE_FOLDER);
 	if (imageNode == 0 ){return 255;}
 
-	//Calculo do endereço que contém o INode raiz das imagens
-	U32 address = inodeAddr + (imageNode-1)*INODE_SIZE;
-
-	ATA_read(address,(void*)mbr_buffer,ZONE);
-	amt=getImagesINodes(partition,&mbr_buffer[0],mbr_buffer,inodeAddr);
+	amt=getImagesINodes(partition,&mbr_buffer[imageNode-1],mbr_buffer,inodeAddr);
 	return amt;
 }
 
@@ -282,8 +271,7 @@ U32 Minix_LoadImages(Partition* partition, SuperBlock* superBlock,INode* mbr_buf
 	return getINodes(partition,superBlock,mbr_buffer);
 }
 
-/**
-
+/*
 int main(int argc, char **argv)
 {
 PartitionTable table;
@@ -297,5 +285,5 @@ INode	inodeBuffer[INODE_BUFFER];
 	printf("Numero de imagens: %i\n", imageNbr);
 	return 0;
 }
+*/
 
-**/
