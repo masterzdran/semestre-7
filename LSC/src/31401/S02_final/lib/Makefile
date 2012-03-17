@@ -35,3 +35,5 @@ install: lsc-boot.sys lscboot.bin
 lsc-boot.sys: start16.o start64.o TIMER.o ATA.o MINIX_FS.o BMP.o  VESA.o  Main.o 
 	$(LD) $(LDSCRIPT) $(LD_SCRIPT64) $(OUTPUT) $@ $^
 
+clean: 
+	$(RM) -f /mnt/lsc/hd0p2/*.sys
