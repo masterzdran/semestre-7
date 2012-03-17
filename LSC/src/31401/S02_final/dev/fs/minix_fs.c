@@ -15,7 +15,7 @@ int strcmp(s1, s2)
 U32 readPartition(PARTITION* partition, unsigned partitionNbr){
 	char mbr[512]; 
 	PARTITION_TABLE * partitionTable = (PARTITION_TABLE*)&mbr[446];
-	ATA_read( 0,((U16*)mbr), 1);
+	ATA_read(((U16*)mbr), 0, 1);
    partition->fileDescriptor = partitionNbr;
 	partition->partitionTable = partitionTable[partitionNbr];
 	return 0;
@@ -25,7 +25,7 @@ U32 readPartition(PARTITION* partition, unsigned partitionNbr){
 U32 readSectors(PARTITION * partition, U32 firstSector, U32 numberSectors, void * destination)
 {
 	int addr = ( (partition->partitionTable.lba_start) + firstSector*2 );
-	return ATA_read(addr,destination, numberSectors);
+	return ATA_read(destination, addr, numberSectors);
 }
 
 int getNodes( PARTITION * partition, void * buffer ){	

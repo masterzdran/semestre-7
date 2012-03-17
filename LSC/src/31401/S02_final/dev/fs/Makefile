@@ -30,21 +30,14 @@ include $(PROJECT_PATH)/common.mk
 .PHONY 					= clean
 .PHONY					= clear
 #=======================================================================
-#FS.o: fs.c include_linux_minix_fs.h MINIX_FS.o
-#	$(CC) $(EXTRAOPTIONS) $(COPTIONS) $(DEBUGSYMBOLS) $(OUTPUT) $@ $<  
-#	$(CP)	$@ $(LIB) 
-#	$(CP) include_linux_minix_fs.h $(INCLUDE)
-	
-
-#MINIX_FS.o: minix_fs.c minix_fs.h
-MINIX_FS.o: fs.c include_linux_minix_fs.h
+MINIX_FS.o: minix_fs.c minix_fs.h
 	$(CC) $(EXTRAOPTIONS) $(COPTIONS) $(COMPILE_ONLY) $(OUTPUT) $@ $<  
 	$(CP)	$@ $(LIB) 
-	$(CP) include_linux_minix_fs.h $(INCLUDE)
+	$(CP) minix_fs.h $(INCLUDE)
 
 clean:
 	@echo "----------------------------------------------------------------------"
-	$(RM) $(LIB)/MINIX_FS.o $(INCLUDE)/include_linux_minix_fs.h
+	$(RM) $(LIB)/MINIX_FS.o $(INCLUDE)/minix_fs.h
 	$(RM)	*.o 
 	
 	

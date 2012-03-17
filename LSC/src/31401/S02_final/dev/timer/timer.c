@@ -21,37 +21,39 @@
 #include "io.h"
 #define BYTE 8
 
-#define FREQUENCY 1193180  
-#define MILI		1000
-#define SECOND		1
-#define DEFAULT_MS	10
-#define MAX_TIMER_COUNT 65536
+static int lastCount = 0;
+static void Timer_reset(unsigned int milis)
+{
+	outb( milis        & LOW_BYTE_MASK,  __SELECT_COUNTER_0__);        
+	outb((milis>> BYTE)& LOW_BYTE_MASK,  __SELECT_COUNTER_0__);   
+}
 
 void Timer_start()
 {
-	int timerSetup = (FREQUENCY/MILI)*DEFAULT_MS + 1 ;
 	outb(ACTION,__CONTROL__);
-	outb( timerSetup         & LOW_BYTE_MASK,  __SELECT_COUNTER_0__);        
-	outb((timerSetup >> BYTE)& LOW_BYTE_MASK,  __SELECT_COUNTER_0__);  
+	Timer_reset(RESET_VALUE);
 }
 
-static U32 Timer_Read()
+static unsigned int Timer_read()
 {
- 	outb(0,__CONTROL__);                   
-	int timer_read  = inb(__SELECT_COUNTER_0__); 
-	    timer_read += inb(__SELECT_COUNTER_0__)<< BYTE;
-	return timer_read;  
+	outb(0,__CONTROL__);                   
+	int data  = inb(__SELECT_COUNTER_0__); 
+	    data += inb(__SELECT_COUNTER_0__)<< BYTE;
+	return data;
 }
 
-void Timer_delay(long elapse)
+static unsigned int Timer_cycles()
 {
-   U32 start = Timer_Read();
-   U32 now   = 0;
-   while(elapse>0)
-   {
-		now = Timer_Read();
-		if (now > start)
-			elapse-=10;
-		start = now;	
-	 }
+	int aux = Timer_read();
+	int res = lastCount - aux;
+	lastCount = aux;
+	return 	( res ) < 0 ? 1 : 0;
+}
+
+void Timer_delay(long milis)
+{
+	while(milis>0)
+	{
+		if(Timer_cycles()>0)milis -=10 ;
+	}
 }
