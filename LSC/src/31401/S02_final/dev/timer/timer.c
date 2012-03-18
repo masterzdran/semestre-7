@@ -30,7 +30,6 @@
 void Timer_start()
 {
 	int timerSetup = (FREQUENCY/MILI)*DEFAULT_MS + 1 ;
-	//int timerSetup = 0x2E90;
 	outb(ACTION,__CONTROL__);
 	outb( timerSetup         & LOW_BYTE_MASK,  __SELECT_COUNTER_0__);        
 	outb((timerSetup >> BYTE)& LOW_BYTE_MASK,  __SELECT_COUNTER_0__);  
