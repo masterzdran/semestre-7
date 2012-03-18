@@ -25,6 +25,12 @@
 #define __SELECT_COUNTER_1__     (0x41)
 #define __SELECT_COUNTER_2__     (0x42)
 #define __CONTROL__    (0x43)
+
+
+#define __SC_COUNTER_0__     (0x00 << 6)
+#define __SC_COUNTER_1__     (0x01 << 6)
+#define __SC_COUNTER_2__     (0x02 << 6)
+
 //Read/Write
 #define __COUNTER_LATCH_COMMAND__            (0x00 << 4) 
 #define __READ_WRITE_LSB_ONLY__              (0x01 << 4)
@@ -38,12 +44,11 @@
 #define __MODE_4__         (0x04 << 1)
 #define __MODE_5__         (0x05 << 1)
 //BCD
-#define __BINARY_COUNTER_16B__         (0x00 << 0)
-#define __BINARY_CODED_DECIMAL__       (0x01 << 0)
+#define __BINARY_COUNTER_16B__         (0x01 << 0)
+#define __BINARY_CODED_DECIMAL__       (0x00 << 0)
 
 #define LOW_BYTE_MASK      (0xFF)
-#define ACTION             (0x34)
-#define RESET_VALUE        (0x2E90)
+#define ACTION             (__SC_COUNTER_0__ |__READ_WRITE_LSB_FIRST_MSB_AFTER__ | __MODE_2__ | __BINARY_CODED_DECIMAL__)
 void Timer_start();
-void Timer_delay(long milis);
+void Timer_delay(long elapse);
 #endif

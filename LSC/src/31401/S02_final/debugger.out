@@ -2,4 +2,4 @@ Next at t=0
 (0) [0x00000000fffffff0] f000:fff0 (unk. ctxt): jmp far f000:e05b         ; ea5be000f0
 bx_dbg_read_linear: physical memory read error (phy=0x0000000100000000, lin=0x0000000100000000)
 c
-(0).[312450000] [0x000000000001064f] 0008:000000000001064f (unk. ctxt): call .-150 (0x00000000000105be) ; e86affffff
+(0).[762500000] [0x0000000000007d36] 0000:7d36 (unk. ctxt): jmp .-3 (0x00007d35)      ; ebfd
