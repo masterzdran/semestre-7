@@ -24,8 +24,8 @@ INCLUDE			= $(SOURCE)/include
 SEARCHINCLUDE	= -I$(INCLUDE) 
 SEARCHLIB		= -L$(LIB)/
 VPATH 			= $(LIB)
-DSK_HOME			= /home/masterzdran/WorkingArea/Isel/semester-7/LSC/dsk
-
+#DSK_HOME			= /home/masterzdran/WorkingArea/Isel/semester-7/LSC/dsk
+DSK_HOME			= /mnt/hgfs/D/ISEL/Semestre7/LSC/dsk
 #Executables
 CC 				= gcc
 LD 				= ld

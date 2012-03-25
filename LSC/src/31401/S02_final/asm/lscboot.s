@@ -1,206 +1,115 @@
-.equ START_ADDR, 0x7C00  			# .equ defines a textual substitution
-.text                    			# code section starts here
-.code16                  			# this is real mode (16 bit) code		  
-		
+.equ START_ADDR,	0x7C00 			# .equ defines a textual substitution
+.equ START_BUFFER,	0x7E00			
+.equ MEM_BUFFER, 	0x1000		  	# mem buffer position
 
-#------------------------------------------------------------------------------
-#                                 Cleaning
-#------------------------------------------------------------------------------
-  cli                      	# no interrupts while initializing
+.equ DISK_ROOT_ADDR,				0x0
+.equ PARTITION_TABLE_START_ADDR, 	446
+.equ PARTITION_ACTIVE,				0x80
+.equ PARTITION_INFO_SIZE,			16
+
+.equ BLOCK_LBA_SIZE,				2
+.equ SECTORS_PER_BLOCK,				2
+
+
+
+.equ ONE_SECTOR,					0x1
+.equ INODE_BUFFER,					16
+.equ MINIX_PARTITION,				1
+.equ SIZE_OF_BUFFER,				1024
+
+
+    
+.text							# code section starts here
+.code16 						# this is real mode (16 bit) code
+
+cli 							# no interrupts while initializing
+# ... init ... 					# initialization code...
 	ljmp $0, $norm_cs
-	
 norm_cs:
 	xorw %ax, %ax
 	movw %ax, %ds
 	movw %ax, %ss
 	movw %ax, %es
-	movw $START_ADDR, %sp		#init Stack Pointer
+	movw $START_ADDR, %sp 		#init Stack
 	
-#------------------------------------------------------------------------------
-#                                 Init
-#------------------------------------------------------------------------------
-	sti                      	# interrupts enabled after initializing
+	movb %dl, diskid			#the value present in DL when BIOS jumped into 0x07C00 is the diskid
 
-	movb %dl, disk_id			#save active disk id
-								#the value present in DL when BIOS jumped to 0x7C00 is driveid
+sti 							# interrupts enabled after initializing
+# ... prog ... 					# main program body...
 
 
-#------------------------------------------------------------------------------
-#                                 Main
-#------------------------------------------------------------------------------
-#====================
-# SuperBlock
-#====================
-ReadSuperBlock:						
-	movw $dap, %si				#read data to dap
-	movb disk_id, %dl			#identify disk to read
-	movb $0x42, %ah				#identify service to be called
-	int $0x13					#invoke BIOS service
-		
-		###break 0x7c21
-	# First Zone
-	movw $dap, %si	
-	movw 4(%si), %si			#move content of dap destination offset of memory buffer to si
-								#0x7E00 is root dir (i-nodes area)
-	movw 24(%si), %si			#go to izone_0
-	sal $1, %si
+	###b 0x7c16
+
+	#disk sectors to read
+	movw $DISK_ROOT_ADDR, dap_first_sector	#to read the first block
 	
-	movw first_sector, %di
+	#read data from disk to dap
+	movw $dap, %si							#read data to dap
+	movb diskid, %dl						#identify disk to read
+	movb $0x42, %ah							#identify service to be called
+	int  $0x13								#invoke BIOS service	
+
+	###b 0x7c27
+	movw $START_BUFFER, %bx
+	addw $PARTITION_TABLE_START_ADDR, %bx
+	#bx points to begin of partition table
 	
-	addw %di, %si				#add izone0_adress to base_address
-	movw %si, dap+8				#si points to destination offset of memory buffer
-			
-	movw $dap, %si				#reading root directory entries
-	movb disk_id, %dl
+find_active_partition:
+	cmpb %dl, (%bx)
+	je	 active_partition_found
+	addw $PARTITION_INFO_SIZE, %bx
+	jmp  find_active_partition
+	
+active_partition_found:
+	###b 0x7c37
+	movw  8(%bx), %bx
+	movw %bx, LBA_Start
+
+	#LBA_Start has the LBA address of the start of the partition
+	
+#Read SuperBlock
+	
+	#movw LBA_Start, %bx
+	addw $BLOCK_LBA_SIZE, %bx		#LBA start plus 2 sectors for boot block
+	movw %bx, dap_first_sector		#put first sector to be read in DAP
+
+	#read SuperBlock from disk to dap
+	movw $dap, %si
+	movb diskid, %dl
 	movb $0x42, %ah
-	int $0x13
-		###break 0x7c41
-		
-#------------------------------------------------------------------------------
-#                                 Searching Files
-#------------------------------------------------------------------------------
-FileSearch:
-	movw $0x7E42, %si				#where to start search
-									#i-node from 0x7E00, size 64 bytes + 2 bytes to begin of file name
-	movw $filename, %di				#name of file to search in %di
-	movw filename_length, %cx		#size of file lsc.sys + \0 = 8
-	
-WhileFileSearch:
-	
-	cmp $0, -2(%si)					#if next byte after i-node is 0 file don't exist -> exit
-	jz FileNotFound
-	
-	cld								#clear direction flag
-	repe cmpsb		
-	cmp $0, %cx		
-	jz FileFound
-	#reset search
-	movw $filename, %di				#name of file to search in %di
-	addw $0x20 , %si				#move to next file name
-	addw %cx, %si					#si to point to begin of next file name, not middle
-	movw filename_length, %cx		#using the remaining value of cx and filename length
-	subw %cx, %si
-	jmp WhileFileSearch
-	
-FileFound:
-	subw filename_length, %si		#si to point to begin of file name
-	movb -2(%si), %cl				#cl have inode index
-	jmp GetNode
-FileNotFound:
-	jmp stop
+	int  $0x13	
 
-#------------------------------------------------------------------------------
-#                                 Nodes
-#------------------------------------------------------------------------------
-GetNode:
-	movw $0xA964, dap+8	      		#LBA address of first sector to read
+	#with SuperBlock we need to find location for iNodes
+	###b 0x7c50
+	
+	#get I-Node zone start LBA address
+	addw $BLOCK_LBA_SIZE, %bx		#plus 2 sectors for SuperBlock
+	#add  s_imap_blocks * 2
+	movw $START_BUFFER, %si
+	addw $4, %si
+	movw (%si), %cx
+	imulw $2, %cx
+	addw %cx, %bx
+	#add  s_zmap_blocks
+	addw $2, %si
+	movw (%si), %cx
+	imulw $2, %cx
+	addw %cx, %bx
+	movw %bx, LBA_I_Node_Start
+	
+	#get I-Node root to find where is lsc-boot.s
+	movw %bx, dap_first_sector
+	
+	#read I-Node root from disk to dap
+	movw $dap, %si
+	movb diskid, %dl
+	movb $0x42, %ah
+	int  $0x13
+	
+	###b 0x7c7d
+	
 
-CallRead:                   
-	movb disk_id, %dl
-	movw $dap, %si      
-	movb $0x42, %ah     			#Identifying the service 
-	int $0x13           			#Invoking the BIOS service
-	movw $0x7E00, %bx				#bx with start address of first node
-		###break 0x7c7e
-WhileTrue:
-	cmp $1,%cl						#is this the correct inode index?					
-	je GetInfo
-	addw $64, %bx					#go to next node
-	decb %cl
-	jmp WhileTrue
-
-GetInfo:
-	movw 8(%bx),%cx     			#get i_size: file size    		
-	movw %cx,filesize				#save filesize
-	addw $20,%bx					#bx points to start of izone
-	movb $1, %cl
-
-    movw $0x0, dap+4				#prepare DAP to start to copy file to
-	movw $0x1000, dap+6	 			#memory zone starting on 0x1000
-#------------------------------------------------------------------------------
-#                                 Zones
-#------------------------------------------------------------------------------
-		###break 0x7ca2
-
-ReadZone: 
-	addw $4,%bx				#get block number of file
-FixedAddress: 	  
-	movw (%bx),%ax        
-	sal $1,%ax
-	addw $0xA950,%ax      
-		###break 0x7ca8
 	
-	movw %ax, dap+8	      
-
-#====================
-# Load (lsc.sys)
-#====================
-	movb disk_id, %dl
-	movw $dap, %si      
-	movb $0x42, %ah     # Identifying the service 
-	int $0x13           # Invoking the BIOS service
-	
-# calculate next memory address to load data... 
-# !watchout! for end of segment @ 65KB -> resolved in StartSegment
-	movw dap+4, %dx
-	addw $0x400, %dx 	# if(offset > 64KB) { increment segment... } 
-	jc StartSegment
-
-EndLoad:
-	movw %dx, dap+4
-	
-## cmp file size with read length	
-	xorw %dx, %dx
-	movb %cl, %dl
-	sal $10,%dx
-	cmp filesize, %dx
-	jg Terminate             # if( filesize < data read){ exit routine }
-
-## increment read count...
-	incb %cl                # bochs -> b 0x7cd0
-	cmpb $8,%cl
-	jne ReadZone 
-	
-## first indirection trick goes here...
-	addw $4,%bx
-	push %bx
-	
-	movw (%bx), %ax
-	sal $1,%ax
-	addw $0xA950,%ax
-	
-	movw %ax, dap+8	        ## set new LBA address in DAP
-	push dap+4
-	push dap+6
-	
-	movw $8200,%bx
-	movw %bx, dap+4
-	movw $0,dap+6
-	
-## load first indirection pointers to memory
-	movb disk_id, %dl
-	movw $dap, %si      
-	movb $0x42, %ah     # Identifying the service 
-	int $0x13           # Invoking the BIOS service
-	
-	pop dap+6
-	pop dap+4
-	
-	jmp FixedAddress
-	
-StartSegment:
-	movw dap+6,%dx
-	addw $0x1000,%dx
-	movw %dx, dap+6
-	xor %dx, %dx
- 	jmp EndLoad
-	
-Terminate:
-	pop %bx
-	ljmp $0x1000, $0	# long jump (segment, offset)
-stop:
-	hlt
-	jmp stop
 
 .section .rodata         			# program constants (no real protection)
 	filename: 			.asciz "lsc-boot.sys"
@@ -209,15 +118,23 @@ stop:
       
       
 .data                    			
-	filesize: .int  0
-	dap:	.byte 	16  			# length of dap
-			.byte 	0				# unused (default 0)
-			.byte 	2				# number of sectors to read, up to 127
-			.byte 	0				# unused (default 0)
-			.word 	0x7E00			# destination offset of memory buffer
-			.word 	0				# destination segment of memory buffer
-			.quad 	0xA964			# LBA address of the first sector to read
-			
-	disk_id: .word 0
+	filesize: 				.int	0
+	diskid: 				.word 	0	
+	LBA_Start:				.quad	0
+	LBA_I_Node_Start:		.quad	0
+
 	
-.end
+	dap:	
+		dap_length:			.byte 	16  			# length of dap
+		dap_dummy:			.byte 	0				# unused (default 0)
+		dap_number_sectors:	.byte 	2				# number of sectors to read, up to 127 - 2 sectors = 1 block
+		dap_dummy2:			.byte 	0				# unused (default 0)
+		dap_dest_offset:	.word 	0x7E00			# destination offset of memory buffer
+		dap_dest_segment:	.word 	0				# destination segment of memory buffer
+		dap_first_sector:	.quad 	0				# LBA address of the first sector to read
+		#903 zonas = 1806 sectors + LBA Start Offset 43344 = 45150 - first sector to be read
+						
+
+
+
+
