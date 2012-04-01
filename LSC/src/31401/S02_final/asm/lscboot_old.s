@@ -72,7 +72,7 @@ WhileFileSearch:
 	
 	cld								#clear direction flag
 	repe cmpsb		
-	cmp $0, %cx		
+	test %cx, %cx		
 	jz FileFound
 	#reset search
 	movw $filename, %di				#name of file to search in %di
