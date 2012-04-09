@@ -45,12 +45,13 @@ start16:
     #list of available video modes on video_mode_ptr offset and segment
     
     #will save list of available video modes in fs:di and cicle
-    #es:di will have the detail of video mode
+    
     ###b 0x1002d
     
     movw %es:14(%di), %si	#video_mode_ptr_off
 	movw %es:16(%di), %ax	#video_mode_ptr_seg
 	movw %ax, %fs
+	
 	movw $vesa_mode_detail, %di	#will have details here
     
 		#cicle through video modes to find the one we want
@@ -102,9 +103,10 @@ cicle_video_mode:
 	#with AX=0x4f02 and BX set to the video mode id 800x600 at 16bpp
 	#and bit 14 set to 1,to request access via the linear frame buffer. 
 	
-	movw %cx, %bx
+	#cx could have been replaced on interrupt
+	movw %fs:(%si), %cx
 	#request access via LFB
-	orw  $0x4000, %bx
+	orw  $(1<<14), %cx
 	movw $SET_VIDEO_MODE, %ax
 	int  $0x10
 	
@@ -142,42 +144,38 @@ video_mode_end:
 #PDE entries must end with $0x018f for PDE flags (page 4-36)
 #bits from 21 to 29 of linear address
 
-#we need to create an entry for LFB but need to have some extra pages first: 2
+#we need to create an entry for LFB but need to have some extra pages first
 	###b 0x10099
 
 	#first blank page
-	movl $0x0000018f, %eax
+	movl  $0x0000018f, %eax
 	stosl
 	xorl %eax, %eax
 	stosl
-	
 	#second blank page
-	movl $0x0000018f, %eax	#add 1 bit to bit 22 (first bit not offset)
-	addl $0x00200000, %eax  #next page - bit 21
+	movl  $0x0020018f, %eax	#add 1 bit to bit 22 (first bit not offset)
 	stosl
 	xorl %eax, %eax
 	stosl
-	
-	#create 2 pages for lfb for access a lfb up to 4MB
 	
 	movl vesa_mode_detail+40, %eax	#position of lfb pointer
-	andl $0xffe00000, %eax			#clear bits 0-20 (offset) of address
-	orl  $0x0000018f, %eax			#'add' value of PDE flags
+	andl $0xffe00000, %eax	#clear bitos 0-20 (offset) of address
+	orl  $0x0000018f, %eax	#'add' value of PDE flags
 	stosl
 	xorl %eax, %eax
 	stosl
 
 	movl vesa_mode_detail+40, %eax	#position of lfb pointer
-	andl $0xffe00000, %eax			#clear bits 0-20 (offset) of address
-	addl $0x00200000, %eax  		#next page - bit 21
-	orl  $0x0000018f, %eax			#'add' value of PDE flags
+	andl $0xffe00000, %eax	#clear bitos 0-20 (offset) of address
+	addl $0x00200000, %eax  #next page - bit 21
+	orl  $0x0000018f, %eax	#'add' value of PDE flags
 	stosl
 	xorl %eax, %eax
 	stosl
 	
       xorw   %ax, %ax
       #movw   $0x07ff, %cx
-      movw   $0x07f0, %cx	#0x7ff - 4*4 = 0x7f0
+      movw   $0x07f0, %cx	
       rep    stosw
 
       # Enter long mode

@@ -21,7 +21,7 @@
 #define MAX_LINE 600
 #define MAX_COL  800
 typedef RGBPixel PCScreen[MAX_LINE][MAX_COL];
-PCScreen * const screen = (PCScreen*)0x800000; 
+PCScreen * const screen = (PCScreen*)0x400000; 
 #define SCREEN (*screen)
 
 void DisplayPixel(RGBPixel pixel, U32 line, U32 column)
